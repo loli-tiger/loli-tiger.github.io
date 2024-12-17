@@ -1,154 +1,101 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卢骊的个人介绍</title>
+    <title>Lu Li's Personal Introduction</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #fff;
             color: #333;
+            line-height: 1.6;
         }
         .container {
-            width: 80%;
+            max-width: 1200px;
             margin: auto;
-            overflow: hidden;
-        }
-        header {
-            background: #50b3a2;
-            color: #ffffff;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #e8491d 3px solid;
-        }
-        header a {
-            color: #ffffff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 16px;
-        }
-        header ul {
-            padding: 0;
-            list-style: none;
-        }
-        header li {
-            display: inline;
-            margin: 0 20px;
-        }
-        header #branding {
-            float: left;
-        }
-        header #branding h1 {
-            margin: 0;
-        }
-        header nav {
-            float: right;
-            margin-top: 10px;
-        }
-        header .highlight, header .current a {
-            color: #e8491d;
-            font-weight: bold;
-        }
-        header a:hover {
-            color: #ffffff;
-            font-weight: bold;
-        }
-        section#showcase {
-            min-height: 400px;
-            background: url('path-to-image.jpg') no-repeat 0 -100px;
-            text-align: center;
-            color: #ffffff;
-        }
-        section#showcase h1 {
-            margin-top: 100px;
-            font-size: 55px;
-            margin-bottom: 10px;
-        }
-        section#showcase p {
-            font-size: 20px;
-        }
-        section#main {
-            padding: 15px;
-            background: #ffffff;
-        }
-        section#main .about, section#main .contact {
             padding: 20px;
         }
-        section#main h1, section#main h2 {
-            color: #50b3a2;
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
         }
-        section#main p {
-            line-height: 1.6em;
+        header h1 {
+            margin: 0;
+            text-align: center;
         }
-        section#main .contact form input, section#main .contact form textarea {
-            width: 95%;
-            padding: 5px;
+        nav {
+            background: #444;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
         }
-        section#main .contact form button {
-            background: #50b3a2;
-            color: #ffffff;
-            border: none;
-            padding: 10px;
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .main-content {
+            margin-top: 20px;
+        }
+        .main-content h2 {
+            color: #444;
+        }
+        .main-content p {
+            margin: 10px 0;
         }
         footer {
-            background: #50b3a2;
-            color: #ffffff;
+            background: #333;
+            color: #fff;
             text-align: center;
-            padding: 10px;
-            position: relative;
-            bottom: 0;
-            width: 100%;
+            padding: 10px 0;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <div id="branding">
-                <h1>卢骊</h1>
-            </div>
-            <nav>
-                <ul>
-                    <li class="current"><a href="#">首页</a></li>
-                    <li><a href="#">关于我</a></li>
-                    <li><a href="#">项目</a></li>
-                    <li><a href="#">联系方式</a></li>
-                </ul>
-            </nav>
+            <h1>Lu Li</h1>
         </div>
     </header>
 
-    <section id="showcase">
+    <nav>
         <div class="container">
-            <h1>欢迎来到我的个人网站</h1>
-            <p>探索我的专业技能和项目经验</p>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
         </div>
-    </section>
+    </nav>
 
-    <section id="main">
-        <div class="container">
-            <section class="about">
-                <h1>关于我</h1>
-                <p>这里是卢骊的个人介绍，包括教育背景、工作经验和专业技能等。</p>
-            </section>
+    <div class="container main-content">
+        <section id="about">
+            <h2>About Me</h2>
+            <p>Introduce Lu Li's background, education, and work experience here.</p>
+        </section>
 
-            <section class="contact">
-                <h1>联系方式</h1>
-                <form>
-                    <input type="text" placeholder="你的名字">
-                    <input type="email" placeholder="你的邮箱">
-                    <textarea placeholder="你的消息"></textarea>
-                    <button type="submit">发送</button>
-                </form>
-            </section>
-        </div>
-    </section>
+        <section id="projects">
+            <h2>Projects</h2>
+            <p>Display Lu Li's projects and achievements here.</p>
+        </section>
+
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>Email: [lu.li@example.com]</p>
+            <p>LinkedIn: [linkedin.com/in/lu-li]</p>
+        </section>
+    </div>
 
     <footer>
-        <p>卢骊 &copy; 2024</p>
+        <div class="container">
+            <p>&copy; 2024 Lu Li. All rights reserved.</p>
+        </div>
     </footer>
 </body>
 </html>
