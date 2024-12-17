@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卢骊设计师 | 艺术作品</title>
+    <title>卢骊的个人介绍</title>
     <style>
-        body, html {
-            height: 100%;
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: 'Droid Serif', serif; /* 使用衬线字体增加艺术感 */
-            background-color: #f4f4f4; /* 浅灰色背景 */
+            background-color: #f4f4f4;
             color: #333;
         }
         .container {
@@ -19,81 +18,137 @@
             overflow: hidden;
         }
         header {
-            background: #333;
-            color: #fff;
-            padding: 20px 0;
-            text-align: center;
+            background: #50b3a2;
+            color: #ffffff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #e8491d 3px solid;
         }
-        header h1 {
+        header a {
+            color: #ffffff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            display: inline;
+            margin: 0 20px;
+        }
+        header #branding {
+            float: left;
+        }
+        header #branding h1 {
             margin: 0;
         }
-        .portfolio {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            padding: 20px 0;
+        header nav {
+            float: right;
+            margin-top: 10px;
         }
-        .portfolio-item {
-            flex: 0 0 30%; /* 每个项目占总宽度的30% */
-            margin: 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        header .highlight, header .current a {
+            color: #e8491d;
+            font-weight: bold;
         }
-        .portfolio-item img {
-            width: 100%;
-            height: auto;
-            border-bottom: 1px solid #ddd;
+        header a:hover {
+            color: #ffffff;
+            font-weight: bold;
         }
-        .portfolio-item h3 {
-            margin: 0;
-            padding: 10px;
-            background: #333;
-            color: #fff;
+        section#showcase {
+            min-height: 400px;
+            background: url('path-to-image.jpg') no-repeat 0 -100px;
             text-align: center;
+            color: #ffffff;
+        }
+        section#showcase h1 {
+            margin-top: 100px;
+            font-size: 55px;
+            margin-bottom: 10px;
+        }
+        section#showcase p {
+            font-size: 20px;
+        }
+        section#main {
+            padding: 15px;
+            background: #ffffff;
+        }
+        section#main .about, section#main .contact {
+            padding: 20px;
+        }
+        section#main h1, section#main h2 {
+            color: #50b3a2;
+        }
+        section#main p {
+            line-height: 1.6em;
+        }
+        section#main .contact form input, section#main .contact form textarea {
+            width: 95%;
+            padding: 5px;
+        }
+        section#main .contact form button {
+            background: #50b3a2;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
         }
         footer {
-            background: #333;
-            color: #fff;
+            background: #50b3a2;
+            color: #ffffff;
             text-align: center;
-            padding: 10px 0;
-        }
-        footer p {
-            margin: 0;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>卢骊设计师</h1>
+            <div id="branding">
+                <h1>卢骊</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li class="current"><a href="#">首页</a></li>
+                    <li><a href="#">关于我</a></li>
+                    <li><a href="#">项目</a></li>
+                    <li><a href="#">联系方式</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
-    
-    <div class="container">
-        <section class="portfolio">
-            <!-- 作品集项目 -->
-            <div class="portfolio-item">
-                <img src="project1.jpg" alt="项目1">
-                <h3>项目1</h3>
-            </div>
-            <div class="portfolio-item">
-                <img src="project2.jpg" alt="项目2">
-                <h3>项目2</h3>
-            </div>
-            <div class="portfolio-item">
-                <img src="project3.jpg" alt="项目3">
-                <h3>项目3</h3>
-            </div>
-            <!-- 更多项目... -->
-        </section>
-    </div>
-    
-    <footer>
+
+    <section id="showcase">
         <div class="container">
-            <p>&copy; 2024 卢骊设计师. 版权所有。</p>
+            <h1>欢迎来到我的个人网站</h1>
+            <p>探索我的专业技能和项目经验</p>
         </div>
+    </section>
+
+    <section id="main">
+        <div class="container">
+            <section class="about">
+                <h1>关于我</h1>
+                <p>这里是卢骊的个人介绍，包括教育背景、工作经验和专业技能等。</p>
+            </section>
+
+            <section class="contact">
+                <h1>联系方式</h1>
+                <form>
+                    <input type="text" placeholder="你的名字">
+                    <input type="email" placeholder="你的邮箱">
+                    <textarea placeholder="你的消息"></textarea>
+                    <button type="submit">发送</button>
+                </form>
+            </section>
+        </div>
+    </section>
+
+    <footer>
+        <p>卢骊 &copy; 2024</p>
     </footer>
 </body>
 </html>
