@@ -8,27 +8,41 @@
         body {
             background-color: black;
             color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             text-align: center;
         }
         .container {
-            max-width: 800px;
+            max-width: 90%;
             padding: 20px;
             border: 1px solid #333;
             border-radius: 8px;
+            margin: 10px;
+            flex: 1;
         }
         h1 {
             color: #4CAF50;
+            margin: 0;
+            padding-bottom: 20px;
         }
         p {
             font-size: 16px;
             line-height: 1.6;
+            margin: 10px 0;
+        }
+        @media (min-width: 600px) {
+            .container {
+                max-width: 600px;
+            }
+            p {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -43,4 +57,3 @@
     </div>
 </body>
 </html>
-这个HTML页面使用了内联CSS来设置背景颜色为黑色，并设置了文本颜色为白色，以确保内容的可读性。页面中间有一个容器div，其中包含了自我介绍的内容。你可以将<h1>和<p>标签中的内容替换成你自己的介绍信息。
