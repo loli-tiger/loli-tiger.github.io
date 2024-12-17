@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KIMI动画效果</title>
+    <title>卢骊动画效果</title>
     <style>
         body, html {
             height: 100%;
@@ -28,31 +28,29 @@
             50% { opacity: 1; transform: translateX(100%); }
             75% { opacity: 1; transform: translateX(0); }
         }
-        /* 应用动画到K */
-        .K {
+        /* 应用动画到卢 */
+        .Lu {
             animation: cross 3s infinite;
+            left: 0;
         }
-        /* 应用动画到I */
-        .I {
+        /* 应用动画到骊 */
+        .Li {
             animation: cross 3s infinite;
             animation-delay: 0.75s; /* 延迟0.75秒开始 */
+            left: 50%; /* 调整位置以错开动画 */
         }
-        /* 应用动画到M */
-        .M {
-            animation: cross 3s infinite;
-            animation-delay: 1.5s; /* 延迟1.5秒开始 */
-        }
-        /* 应用动画到I */
-        .I2 {
-            animation: cross 3s infinite;
-            animation-delay: 2.25s; /* 延迟2.25秒开始 */
+        /* 应用动画到空白占位符，用于调整骊的位置 */
+        .placeholder {
+            width: 0;
+            height: 0;
+            position: absolute;
+            left: 0;
         }
     </style>
 </head>
 <body>
-    <div class="letter K">K</div>
-    <div class="letter I">I</div>
-    <div class="letter M">M</div>
-    <div class="letter I2">I</div>
+    <div class="letter Lu">卢</div>
+    <div class="letter placeholder"></div>
+    <div class="letter Li">骊</div>
 </body>
 </html>
