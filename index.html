@@ -3,57 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自我介绍</title>
+    <title>KIMI动画效果</title>
     <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        body, html {
+            height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
+            background-color: black;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            text-align: center;
         }
-        .container {
-            max-width: 90%;
-            padding: 20px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin: 10px;
-            flex: 1;
-        }
-        h1 {
+        .letter {
+            position: absolute;
             color: #4CAF50;
-            margin: 0;
-            padding-bottom: 20px;
+            font-size: 5vw; /* 使用视口宽度的百分比来确保在不同设备上都能适应 */
+            opacity: 0; /* 初始状态为不可见 */
         }
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 10px 0;
+        /* 定义动画 */
+        @keyframes cross {
+            0%, 100% { opacity: 0; transform: translateX(-100%); }
+            25% { opacity: 1; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(100%); }
+            75% { opacity: 1; transform: translateX(0); }
         }
-        @media (min-width: 600px) {
-            .container {
-                max-width: 600px;
-            }
-            p {
-                font-size: 18px;
-            }
+        /* 应用动画到K */
+        .K {
+            animation: cross 3s infinite;
+        }
+        /* 应用动画到I */
+        .I {
+            animation: cross 3s infinite;
+            animation-delay: 0.75s; /* 延迟0.75秒开始 */
+        }
+        /* 应用动画到M */
+        .M {
+            animation: cross 3s infinite;
+            animation-delay: 1.5s; /* 延迟1.5秒开始 */
+        }
+        /* 应用动画到I */
+        .I2 {
+            animation: cross 3s infinite;
+            animation-delay: 2.25s; /* 延迟2.25秒开始 */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>你好，我是卢骊</h1>
-        <p>我是一个由月之暗面科技有限公司开发的人工智能助手。</p>
-        <p>我擅长中英文对话，并且能够处理多种文件格式，包括TXT、PDF、Word文档、PPT幻灯片和Excel电子表格。</p>
-        <p>我可以帮助解答问题、提供信息，并且遵守中华人民共和国的法律和政策。</p>
-        <p>我致力于提供安全、有帮助、准确的回答，并且遵守用户指令。</p>
-        <p>如果你有任何问题，随时可以问我！</p>
-    </div>
+    <div class="letter K">K</div>
+    <div class="letter I">I</div>
+    <div class="letter M">M</div>
+    <div class="letter I2">I</div>
 </body>
 </html>
