@@ -3,55 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卢骊动画效果</title>
+    <title>卢骊设计师 | 艺术作品</title>
     <style>
         body, html {
             height: 100%;
             margin: 0;
             padding: 0;
+            font-family: 'Droid Serif', serif; /* 使用衬线字体增加艺术感 */
+            background-color: #f4f4f4; /* 浅灰色背景 */
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
             overflow: hidden;
-            background-color: black;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .portfolio {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Microsoft YaHei', sans-serif; /* 使用无衬线字体以更好地显示汉字 */
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px 0;
         }
-        .letter {
-            position: absolute;
-            color: #4CAF50;
-            opacity: 0; /* 初始状态为不可见 */
+        .portfolio-item {
+            flex: 0 0 30%; /* 每个项目占总宽度的30% */
+            margin: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        /* 定义动画 */
-        @keyframes cross {
-            0%, 100% { opacity: 0; transform: translateX(-100%); }
-            10% { opacity: 1; transform: translateX(0); }
-            50% { opacity: 1; transform: translateX(0); }
-            90% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0; transform: translateX(100%); }
+        .portfolio-item img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
         }
-        /* 应用动画到卢 */
-        .Lu {
-            animation: cross 4s infinite;
-            font-size: 8vw; /* 增加字体大小以适应手机屏幕 */
-            left: 0;
+        .portfolio-item h3 {
+            margin: 0;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            text-align: center;
         }
-        /* 应用动画到骊 */
-        .Li {
-            animation: cross 4s infinite;
-            animation-delay: -2s; /* 延迟2秒开始，使两个动画重叠 */
-            font-size: 8vw; /* 字体大小与卢相同 */
-            left: 0;
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
         }
-        a {
-            text-decoration: none; /* 去除下划线 */
-            color: inherit; /* 保持文字颜色不变 */
+        footer p {
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <a href="http://www.sohu.com" target="_blank">
-        <div class="letter Lu">卢</div>
-        <div class="letter Li">骊</div>
-    </a>
+    <header>
+        <div class="container">
+            <h1>卢骊设计师</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section class="portfolio">
+            <!-- 作品集项目 -->
+            <div class="portfolio-item">
+                <img src="project1.jpg" alt="项目1">
+                <h3>项目1</h3>
+            </div>
+            <div class="portfolio-item">
+                <img src="project2.jpg" alt="项目2">
+                <h3>项目2</h3>
+            </div>
+            <div class="portfolio-item">
+                <img src="project3.jpg" alt="项目3">
+                <h3>项目3</h3>
+            </div>
+            <!-- 更多项目... -->
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 卢骊设计师. 版权所有。</p>
+        </div>
+    </footer>
 </body>
 </html>
