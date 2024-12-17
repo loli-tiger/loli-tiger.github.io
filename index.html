@@ -14,43 +14,38 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: 'Microsoft YaHei', sans-serif; /* 使用无衬线字体以更好地显示汉字 */
         }
         .letter {
             position: absolute;
             color: #4CAF50;
-            font-size: 5vw; /* 使用视口宽度的百分比来确保在不同设备上都能适应 */
             opacity: 0; /* 初始状态为不可见 */
         }
         /* 定义动画 */
         @keyframes cross {
             0%, 100% { opacity: 0; transform: translateX(-100%); }
-            25% { opacity: 1; transform: translateX(0); }
-            50% { opacity: 1; transform: translateX(100%); }
-            75% { opacity: 1; transform: translateX(0); }
+            10% { opacity: 1; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(0); }
+            90% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(100%); }
         }
         /* 应用动画到卢 */
         .Lu {
-            animation: cross 3s infinite;
+            animation: cross 4s infinite;
+            font-size: 8vw; /* 增加字体大小以适应手机屏幕 */
             left: 0;
         }
         /* 应用动画到骊 */
         .Li {
-            animation: cross 3s infinite;
-            animation-delay: 0.75s; /* 延迟0.75秒开始 */
-            left: 50%; /* 调整位置以错开动画 */
-        }
-        /* 应用动画到空白占位符，用于调整骊的位置 */
-        .placeholder {
-            width: 0;
-            height: 0;
-            position: absolute;
+            animation: cross 4s infinite;
+            animation-delay: -2s; /* 延迟2秒开始，使两个动画重叠 */
+            font-size: 8vw; /* 字体大小与卢相同 */
             left: 0;
         }
     </style>
 </head>
 <body>
     <div class="letter Lu">卢</div>
-    <div class="letter placeholder"></div>
     <div class="letter Li">骊</div>
 </body>
 </html>
