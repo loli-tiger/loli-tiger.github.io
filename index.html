@@ -106,14 +106,9 @@
             `;
             
             // 将 Markdown 转换为 HTML 并显示
-            updateContent(defaultMarkdown);
-        });
-
-        // 更新内容函数
-        function updateContent(markdown) {
-            const html = marked.parse(markdown);
+            const html = marked.parse(defaultMarkdown);
             document.getElementById('content').innerHTML = html;
-        }
+        });
     </script>
 </body>
 </html>
