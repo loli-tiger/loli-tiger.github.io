@@ -71,39 +71,39 @@
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             // 默认展示一些 Markdown 内容
-            const defaultMarkdown = \\
-                # 欢迎来到 Markdown 查看器
-                
-                ## 功能演示
-                
-                - **加粗文本**：使用双星号 (**)
-                - *斜体文本*：使用单星号 (*)
-                - ~~删除线~~：使用双波浪线 (~~)
-                
-                ### 代码块
-                
-                \`\`\`javascript
-                function helloWorld() {
-                    console.log("Hello, World!");
-                }
-                \`\`\`
-                
-                ### 列表
-                
-                1. 第一项
-                2. 第二项
-                3. 第三项
-                
-                - 列表项 1
-                - 列表项 2
-                - 列表项 3
-                
-                ### 链接和图片
-                
-                [Thunkable 官方网站](https://www.thunkable.com)
-                
-                ![Thunkable Logo](https://www.thunkable.com/static/images/logo.png)
-           \\;
+            const defaultMarkdown = `
+# 欢迎来到 Markdown 查看器
+
+## 功能演示
+
+- **加粗文本**：使用双星号 (**)
+- *斜体文本*：使用单星号 (*)
+- ~~删除线~~：使用双波浪线 (~~)
+
+### 代码块
+
+\`\`\`javascript
+function helloWorld() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+### 列表
+
+1. 第一项
+2. 第二项
+3. 第三项
+
+- 列表项 1
+- 列表项 2
+- 列表项 3
+
+### 链接和图片
+
+[Thunkable 官方网站](https://www.thunkable.com)
+
+![Thunkable Logo](https://www.thunkable.com/static/images/logo.png)
+            `;
             
             // 将 Markdown 转换为 HTML 并显示
             const html = marked.parse(defaultMarkdown);
