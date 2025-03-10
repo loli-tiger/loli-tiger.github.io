@@ -71,7 +71,7 @@
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             // 默认展示一些 Markdown 内容
-            const defaultMarkdown = `
+            const defaultMarkdown = \\
                 # 欢迎来到 Markdown 查看器
                 
                 ## 功能演示
@@ -103,7 +103,7 @@
                 [Thunkable 官方网站](https://www.thunkable.com)
                 
                 ![Thunkable Logo](https://www.thunkable.com/static/images/logo.png)
-            `;
+           \\;
             
             // 将 Markdown 转换为 HTML 并显示
             const html = marked.parse(defaultMarkdown);
