@@ -1,108 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Viewer</title>
-    <!-- 引入 marked.js 库用于解析 Markdown -->
+    <title>Markdown浏览器渲染器</title>
+    
+    <!-- 引入依赖库 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+        /* 基础样式 */
+        .container {
+            display: flex;
+            gap: 20px;
             padding: 20px;
-            background-color: #f5f5f5;
+            font-family: system-ui;
         }
-        #content {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-height: calc(100vh - 40px);
+        
+        /* 编辑区样式 */
+        #editor {
+            width: 45vw;
+            height: 80vh;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            font-family: 'Courier New', monospace;
         }
-        h1, h2, h3, h4, h5, h6 {
-            color: #333;
+
+        /* 预览区样式 */
+        #preview {
+            width: 45vw;
+            height: 80vh;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-y: auto;
         }
-        p {
-            line-height: 1.6;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        ul, ol {
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        code {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-        }
-        pre {
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 10px;
-            overflow-x: auto;
-            font-family: monospace;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        strong {
-            font-weight: bold;
-        }
-        em {
-            font-style: italic;
-        }
+
+        /* Markdown元素样式 */
+        #preview h1 { border-bottom: 2px solid #eee; }
+        #preview code { background: #f5f5f5; padding: 2px 5px; }
+        #preview pre { background: #1e1e1e; color: #fff; padding: 15px; }
+        #preview blockquote { border-left: 3px solid #ddd; padding-left: 10px; }
     </style>
 </head>
 <body>
-    <div id="content"></div>
+    <div class="container">
+        <textarea id="editor" placeholder="输入Markdown内容..."></textarea>
+        <div id="preview"></div>
+    </div>
 
     <script>
-        // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 默认展示一些 Markdown 内容
-            const defaultMarkdown = `
-                # 欢迎来到 Markdown 查看器
-                
-                ## 功能演示
-                
-                - **加粗文本**：使用双星号 (**)
-                - *斜体文本*：使用单星号 (*)
-                - ~~删除线~~：使用双波浪线 (~~)
-                
-                          
-                ### 列表
-                
-                1. 第一项
-                2. 第二项
-                3. 第三项
-                
-                - 列表项 1
-                - 列表项 2
-                - 列表项 3
-                
-                ### 链接和图片
-                
-                [Thunkable 官方网站](https://www.thunkable.com)
-                
-                ![Thunkable Logo](https://www.thunkable.com/static/images/logo.png)
-            `;
-            
-            // 将 Markdown 转换为 HTML 并显示
-            const html = marked.parse(defaultMarkdown);
-            document.getElementById('content').innerHTML = html;
+        // 配置Marked解析器
+        marked.setOptions({
+            breaks: true,        // 换行即<br>
+            gfm: true,           // 支持GitHub风格语法
+            highlight: code => hljs.highlightAuto(code).value
         });
+
+        // 获取DOM元素
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+
+        // 初始示例内容
+        const defaultMarkdown = `# Markdown示例
+
+## 基础语法
+**粗体文字**、*斜体文字*、\`行内代码\`
+
+## 代码块
+\`\`\`javascript
+function hello() {
+    console.log("Hello World!");
+}
+\`\`\`
+
+## 列表
+- 无序列表项
+1. 有序列表项
+
+## 链接
+[DeepSeek](https://www.deepseek.com)
+`;
+
+        // 初始化编辑器
+        editor.value = defaultMarkdown;
+        updatePreview();
+
+        // 实时更新预览
+        editor.addEventListener('input', updatePreview);
+
+        // 核心渲染函数
+        function updatePreview() {
+            // 安全过滤后渲染
+            const rawMarkdown = editor.value;
+            const dirtyHtml = marked.parse(rawMarkdown);
+            const cleanHtml = DOMPurify.sanitize(dirtyHtml);
+            
+            preview.innerHTML = cleanHtml;
+        }
     </script>
 </body>
 </html>
