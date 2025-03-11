@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,4 +82,24 @@
         });
     </script>
 </body>
+      <script type="text/javascript">
+    // Function to handle incoming messages that expect a return value
+    ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
+      // Create the response by prefixing the received message with "demo: "
+      const response = 'demo: ' + message;
+      
+      // Optionally display the received message on the webpage
+      document.getElementById('messageDisplay').innerText = response;
+      
+      // Send the response back to the Thunkable app
+      callback(response);
+    });
+
+    // Optional: Handle incoming messages that do not expect a return value
+    ThunkableWebviewerExtension.receiveMessage(function(message) {
+      // Display the received message with "demo: " prefix
+      const response = 'demo: ' + message;
+      document.getElementById('messageDisplay').innerText = response;
+    });
+  </script>
 </html>
