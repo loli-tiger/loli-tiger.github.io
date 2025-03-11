@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 40px);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        strong {
+            font-weight: bold;
+        }
+        em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div id="content"></div>
+
+    <script>
+        // 监听来自Thunkable应用的消息
+        ThunkableWebviewerExtension.receiveMessage(function(message) {
+            // 接收Markdown内容
+            var markdown = message;
+            
+            // 将Markdown转换为HTML
+            var html = marked.parse(markdown);
+            
+            // 显示HTML内容
+            document.getElementById('content').innerHTML = html;
+        });
+    </script>
+</body>
+</html>
