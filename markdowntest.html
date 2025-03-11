@@ -68,9 +68,19 @@
 <body>
     <div id="content"></div>
 
-    <script>
+    <script type="text/javascript">
+         ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+             callback(response);
+              });
+         ThunkableWebviewerExtension.receiveMessage(function(message) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+              });
+        </script>
         // 监听来自Thunkable应用的消息
-        window.addEventListener('message', function(event) {
+       window.addEventListener('message', function(event) {
             // 接收Markdown内容
             var markdown = event.data;
             
@@ -82,24 +92,4 @@
         });
     </script>
 </body>
-      <script type="text/javascript">
-    // Function to handle incoming messages that expect a return value
-    ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
-      // Create the response by prefixing the received message with "demo: "
-      const response = 'demo: ' + message;
-      
-      // Optionally display the received message on the webpage
-      document.getElementById('messageDisplay').innerText = response;
-      
-      // Send the response back to the Thunkable app
-      callback(response);
-    });
-
-    // Optional: Handle incoming messages that do not expect a return value
-    ThunkableWebviewerExtension.receiveMessage(function(message) {
-      // Display the received message with "demo: " prefix
-      const response = 'demo: ' + message;
-      document.getElementById('messageDisplay').innerText = response;
-    });
-  </script>
 </html>
