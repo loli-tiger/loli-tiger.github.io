@@ -84,8 +84,9 @@
         <script type="text/javascript">
          ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
              const response = 'demo: ' + message;
-             document.getElementById('messageDisplay').innerText = response;
-             callback(response);
+             var markdowntest = response;
+             document.getElementById('messageDisplay').innerHTML = marked.parse(markdowntest);
+             callback(markdowntest);
               });
          ThunkableWebviewerExtension.receiveMessage(function(message) {
              const response = 'demo: ' + message;
