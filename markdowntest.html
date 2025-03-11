@@ -68,17 +68,7 @@
 <body>
     <div id="content"></div>
 
-    <script type="text/javascript">
-         ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
-             const response = 'demo: ' + message;
-             document.getElementById('messageDisplay').innerText = response;
-             callback(response);
-              });
-         ThunkableWebviewerExtension.receiveMessage(function(message) {
-             const response = 'demo: ' + message;
-             document.getElementById('messageDisplay').innerText = response;
-              });
-        </script>
+
         // 监听来自Thunkable应用的消息
        window.addEventListener('message', function(event) {
             // 接收Markdown内容
@@ -92,4 +82,15 @@
         });
     </script>
 </body>
+        <script type="text/javascript">
+         ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+             callback(response);
+              });
+         ThunkableWebviewerExtension.receiveMessage(function(message) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+              });
+        </script>
 </html>
