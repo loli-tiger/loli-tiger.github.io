@@ -7,8 +7,13 @@
 <body>
 你好吗？?？
     <span id="content"></span>
-    <script>
+    <script type="text/javascript">
         // 监听来自Thunkable应用的消息
+        // when we get a message from the app, display it on the page
+    ThunkableWebviewerExtension.receiveMessage(function(message) {
+  // Do something with your message
+    alert(message)
+    });
         window.addEventListener('message', function(event) {
             // 接收Markdown内容
             var markdown = event.data;
