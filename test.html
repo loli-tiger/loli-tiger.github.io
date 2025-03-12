@@ -2,60 +2,175 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'">
+    
+    <!-- Markdown主题样式 -->
     <style>
-        /* 紧急修复样式 */
-        body {
-            margin: 20px;
-            background: white !important;
-        }
-        
-        #content-container {
-            border: 2px solid red; /* 调试边框 */
-            font-size: 18px;
-            color: black !important;
+        :root {
+            --base-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            --code-font: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            --text-primary: #2d3436;
+            --code-bg: #f8f9fa;
+            --border-color: #dfe6e9;
         }
 
-        #content-container * {
-            color: inherit !important;
-            background: transparent !important;
+        .markdown-body {
+            font-family: var(--base-font);
+            line-height: 1.6;
+            color: var(--text-primary);
+            padding: 20px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* 标题系统 */
+        .markdown-body h1 { 
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.3em;
+            margin: 1.5em 0 1em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.2em;
+            margin: 1.3em 0 0.8em;
+        }
+
+        /* 代码块系统 */
+        .markdown-body pre {
+            background: var(--code-bg);
+            padding: 1em;
+            border-radius: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 1em 0;
+        }
+
+        .markdown-body code {
+            font-family: var(--code-font);
+            background: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        /* 响应式处理 */
+        @media (max-width: 480px) {
+            .markdown-body {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .markdown-body pre {
+                border-radius: 0;
+                margin-left: -15px;
+                margin-right: -15px;
+            }
+        }
+
+        /* 故障安全机制 */
+        .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em auto;
+        }
+
+        .markdown-body img:before {
+            content: "图片加载失败";
+            display: block;
+            color: #ff7675;
+            border: 1px dashed #ff7675;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="debug-console"></div>
-    <div id="content-container"></div>
+    <main class="markdown-body"></main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
 
     <script>
         (function() {
-            // 强制重置样式
-            const style = document.createElement('style');
-            style.textContent = `
-                h1,h2,h3,h4,h5,h6,p,pre,code {
-                    margin: 10px 0 !important;
-                    padding: 0 !important;
-                    font-family: Arial !important;
-                }
-                pre {
-                    background: #f0f0f0 !important;
-                    padding: 10px !important;
-                }
-            `;
-            document.head.appendChild(style);
+            'use strict';
 
-            ThunkableWebviewerExtension.receiveMessage(msg => {
-                document.getElementById('content-container').innerHTML = marked.parse(msg);
-                
-                // 强制触发重绘
-                setTimeout(() => {
-                    document.body.style.display = 'none';
-                    document.body.offsetHeight;
-                    document.body.style.display = 'block';
-                }, 50);
+            // 配置Marked解析器
+            marked.use({
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                renderer: new marked.Renderer({
+                    link(href, title, text) {
+                        return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+                    }
+                })
             });
+
+            // 初始化容器
+            const container = document.querySelector('.markdown-body');
+            
+            // 增强型消息处理器
+            function processContent(raw) {
+                try {
+                    // 预处理空内容
+                    if (!raw.trim()) return showError('收到空内容');
+                    
+                    // 异步解析防止阻塞
+                    requestAnimationFrame(() => {
+                        container.innerHTML = marked.parse(raw);
+                        
+                        // 后处理DOM
+                        enhanceAccessibility();
+                        handleImages();
+                    });
+                    
+                } catch (e) {
+                    showError(`内容解析失败: ${e.message}`);
+                }
+            }
+
+            // 图片处理
+            function handleImages() {
+                container.querySelectorAll('img').forEach(img => {
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.alt = '图片加载失败';
+                        this.style.border = '1px dashed #ff7675';
+                    };
+                });
+            }
+
+            // 可访问性增强
+            function enhanceAccessibility() {
+                container.querySelectorAll('a').forEach(a => {
+                    a.setAttribute('aria-label', `外部链接：${a.innerText}`);
+                });
+            }
+
+            // 错误处理
+            function showError(msg) {
+                container.innerHTML = `
+                    <div class="error-alert">
+                        <h3>内容渲染异常</h3>
+                        <p>${msg}</p>
+                    </div>
+                `;
+            }
+
+            // 初始化监听
+            ThunkableWebviewerExtension.receiveMessage(processContent);
+
+            // 容错检测
+            setTimeout(() => {
+                if (!container.innerHTML) {
+                    showError('内容加载超时，请检查网络连接');
+                }
+            }, 8000);
+
         })();
     </script>
 </body>
