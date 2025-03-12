@@ -8,6 +8,7 @@
     bottom: 10px;
     left: 10px;
     font-family: Arial, sans-serif;
+    display: none; /* 初始时隐藏动画 */
   }
   
   .thinking-dot {
@@ -35,8 +36,15 @@
     <div id="thinkingAnimation">思考中<span class="thinking-dot">.</span><span class="thinking-dot">.</span><span class="thinking-dot">.</span></div>
     <script type="text/javascript">
          ThunkableWebviewerExtension.receiveMessage(function(message) {
+             // 显示动画
+             document.getElementById('thinkingAnimation').style.display = 'inline';
+             
+             // 处理消息
              var html = marked.parse(message);
              document.getElementById('messageDisplay').innerHTML = html;
+             
+             // 处理完成后隐藏动画
+             document.getElementById('thinkingAnimation').style.display = 'none';
               });
     </script>
 </body>
