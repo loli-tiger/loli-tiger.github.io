@@ -3,102 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 简化CSP策略 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'">
-
     <style>
-        /* 极简调试样式 */
+        /* 紧急修复样式 */
         body {
-            margin: 0;
-            padding: 20px;
-            background: white;
-            color: black; /* 强制黑色文本 */
-            font-size: 16px;
+            margin: 20px;
+            background: white !important;
         }
         
-        #debug-console {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px;
-            font-family: monospace;
-            display: block !important; /* 确保始终显示 */
+        #content-container {
+            border: 2px solid red; /* 调试边框 */
+            font-size: 18px;
+            color: black !important;
+        }
+
+        #content-container * {
+            color: inherit !important;
+            background: transparent !important;
         }
     </style>
 </head>
 <body>
-    <!-- 调试信息面板 -->
-    <div id="debug-console">[Debug Console]</div>
-    
-    <!-- 内容容器 -->
+    <div id="debug-console"></div>
     <div id="content-container"></div>
 
-    <!-- 依赖库 -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
 
     <script>
         (function() {
-            // 调试输出函数
-            function debugLog(message) {
-                const consoleDiv = document.getElementById('debug-console');
-                consoleDiv.innerHTML += `${new Date().toLocaleTimeString()}: ${message}<br>`;
-                console.log('[DEBUG]', message); // 同时输出到真实控制台
-            }
-
-            // 初始化标记
-            debugLog("脚本开始执行");
-
-            // 核心渲染函数
-            function renderContent(raw) {
-                try {
-                    debugLog("收到原始内容：" + raw.substring(0, 50) + "...");
-                    
-                    const html = marked.parse(raw);
-                    debugLog("Markdown转换完成，HTML长度：" + html.length);
-                    
-                    document.getElementById('content-container').innerHTML = html;
-                    debugLog("内容已注入DOM");
-                    
-                } catch (e) {
-                    debugLog("发生错误：" + e.message);
-                    document.getElementById('content-container').innerHTML = 
-                        `<div style="color:red;padding:20px;">渲染错误：${e.message}</div>`;
+            // 强制重置样式
+            const style = document.createElement('style');
+            style.textContent = `
+                h1,h2,h3,h4,h5,h6,p,pre,code {
+                    margin: 10px 0 !important;
+                    padding: 0 !important;
+                    font-family: Arial !important;
                 }
-            }
+                pre {
+                    background: #f0f0f0 !important;
+                    padding: 10px !important;
+                }
+            `;
+            document.head.appendChild(style);
 
-            // 初始化事件监听
-            document.addEventListener('DOMContentLoaded', () => {
-                debugLog("DOM准备就绪");
+            ThunkableWebviewerExtension.receiveMessage(msg => {
+                document.getElementById('content-container').innerHTML = marked.parse(msg);
                 
-                // 注册消息监听
-                if (typeof ThunkableWebviewerExtension !== 'undefined') {
-                    debugLog("检测到Thunkable扩展");
-                    
-                    ThunkableWebviewerExtension.receiveMessage((message) => {
-                        debugLog("接收到消息");
-                        renderContent(message);
-                    });
-                    
-                } else {
-                    debugLog("错误：未找到Thunkable扩展");
-                    document.getElementById('content-container').innerHTML = 
-                        "未检测到Thunkable运行时环境";
-                }
+                // 强制触发重绘
+                setTimeout(() => {
+                    document.body.style.display = 'none';
+                    document.body.offsetHeight;
+                    document.body.style.display = 'block';
+                }, 50);
             });
-
-            // 超时检测
-            setTimeout(() => {
-                if (!document.getElementById('content-container').innerHTML) {
-                    debugLog("超时：未收到任何内容");
-                    document.getElementById('content-container').innerHTML = 
-                        "等待内容超时，请检查数据连接";
-                }
-            }, 5000);
-
         })();
     </script>
 </body>
