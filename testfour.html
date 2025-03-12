@@ -1,51 +1,132 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
-<style>
-  #thinkingAnimation {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    font-family: Arial, sans-serif;
-    display: none; /* 初始时隐藏动画 */
-  }
-  
-  .thinking-dot {
-    display: inline-block;
-    animation: dotPulse 1.5s infinite;
-    margin-left: 2px;
-  }
-  
-  .thinking-dot:nth-child(2) {
-    animation-delay: 0.3s;
-  }
-  
-  .thinking-dot:nth-child(3) {
-    animation-delay: 0.6s;
-  }
-  
-  @keyframes dotPulse {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- 样式优化 -->
+    <style>
+        :root {
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        #thinkingAnimation {
+            position: fixed;
+            left: 50%;
+            bottom: calc(var(--safe-area-bottom) + 20px);
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: system-ui, -apple-system, sans-serif;
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            z-index: 1000;
+        }
+
+        .thinking-dot {
+            display: inline-block;
+            animation: dotPulse 1.4s infinite ease-in-out;
+            margin-left: 4px;
+            opacity: 0;
+        }
+
+        @keyframes dotPulse {
+            0% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-2px); }
+            100% { opacity: 0; transform: translateY(0); }
+        }
+
+        #messageDisplay {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <span id="messageDisplay"></span>
-    <div id="thinkingAnimation">思考中<span class="thinking-dot">.</span><span class="thinking-dot">.</span><span class="thinking-dot">.</span></div>
-    <script type="text/javascript">
-         ThunkableWebviewerExtension.receiveMessage(function(message) {
-             // 显示动画
-             document.getElementById('thinkingAnimation').style.display = 'inline';
-             
-             // 处理消息
-             var html = marked.parse(message);
-             document.getElementById('messageDisplay').innerHTML = html;
-             
-             // 处理完成后隐藏动画
-             document.getElementById('thinkingAnimation').style.display = 'none';
-              });
+    <main id="messageDisplay"></main>
+    <div id="thinkingAnimation">
+        思考中
+        <span class="thinking-dot">·</span>
+        <span class="thinking-dot">·</span>
+        <span class="thinking-dot">·</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@5.1.2/marked.min.js"></script>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // 配置Marked
+            marked.use({
+                breaks: true,
+                gfm: true,
+                mangle: false,
+                headerIds: false
+            });
+
+            // DOM引用
+            const messageDisplay = document.getElementById('messageDisplay');
+            const thinkingAnim = document.getElementById('thinkingAnimation');
+
+            // 动画控制
+            let isProcessing = false;
+            
+            async function processMessage(message) {
+                if (isProcessing) return;
+                isProcessing = true;
+                
+                try {
+                    // 显示动画
+                    thinkingAnim.style.display = 'flex';
+                    
+                    // 异步处理
+                    await new Promise(resolve => requestAnimationFrame(resolve));
+                    
+                    // 解析内容
+                    if (!message || typeof message !== 'string') {
+                        throw new Error('无效消息内容');
+                    }
+                    
+                    const html = marked.parse(message);
+                    
+                    // 安全更新DOM
+                    requestAnimationFrame(() => {
+                        messageDisplay.innerHTML = html;
+                    });
+                    
+                } catch (error) {
+                    console.error('处理失败:', error);
+                    messageDisplay.innerHTML = `<div class="error">渲染错误：${error.message}</div>`;
+                } finally {
+                    // 保持最少显示时间
+                    setTimeout(() => {
+                        thinkingAnim.style.display = 'none';
+                        isProcessing = false;
+                    }, 500); // 最少显示500ms
+                }
+            }
+
+            // 初始化监听
+            ThunkableWebviewerExtension.receiveMessage(processMessage);
+
+            // 安全区域适配
+            function updateSafeArea() {
+                document.documentElement.style.setProperty(
+                    '--safe-area-bottom',
+                    `env(safe-area-inset-bottom, 20px)`
+                );
+            }
+            
+            window.addEventListener('resize', updateSafeArea);
+            updateSafeArea();
+        })();
     </script>
 </body>
 </html>
