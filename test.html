@@ -2,150 +2,103 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 移动端视口优化 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover">
-    <!-- 内容安全策略 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net https://thunkable.github.io 'unsafe-eval';">
-    
-    <!-- 样式重置 + 基础排版 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 简化CSP策略 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'">
+
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --code-bg: #f8f9fa;
-        }
-
+        /* 极简调试样式 */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--primary-color);
-            padding: 1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            background: white;
+            color: black; /* 强制黑色文本 */
+            font-size: 16px;
         }
-
-        /* Markdown渲染优化 */
-        .markdown-container h1, .markdown-container h2 {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 0.3em;
-        }
-
-        .markdown-container pre {
-            background: var(--code-bg);
-            padding: 1rem;
-            border-radius: 4px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .markdown-container code {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            background: var(--code-bg);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-        }
-
-        .markdown-container img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 1rem auto;
-        }
-
-        /* 错误状态提示 */
-        .error-message {
-            color: #dc3545;
-            padding: 1rem;
-            border: 1px solid rgba(220, 53, 69, 0.3);
-            border-radius: 4px;
-            background: #fff5f5;
-        }
-
-        /* 加载状态指示器 */
-        .loading-indicator {
-            display: none;
-            text-align: center;
-            padding: 1rem;
-            color: #6c757d;
+        
+        #debug-console {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            font-family: monospace;
+            display: block !important; /* 确保始终显示 */
         }
     </style>
+</head>
+<body>
+    <!-- 调试信息面板 -->
+    <div id="debug-console">[Debug Console]</div>
     
+    <!-- 内容容器 -->
+    <div id="content-container"></div>
+
     <!-- 依赖库 -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
-</head>
-<body>
-    <!-- 状态容器 -->
-    <div class="loading-indicator">内容加载中...</div>
-    <div class="markdown-container"></div>
-    <div class="error-message"></div>
 
     <script>
         (function() {
-            'use strict';
+            // 调试输出函数
+            function debugLog(message) {
+                const consoleDiv = document.getElementById('debug-console');
+                consoleDiv.innerHTML += `${new Date().toLocaleTimeString()}: ${message}<br>`;
+                console.log('[DEBUG]', message); // 同时输出到真实控制台
+            }
 
-            // 配置Marked解析器
-            marked.setOptions({
-                breaks: true,
-                gfm: true,
-                sanitize: true,  // 启用HTML过滤
-                highlight: function(code) {
-                    return code;  // 可集成highlight.js实现代码高亮
-                }
-            });
+            // 初始化标记
+            debugLog("脚本开始执行");
 
-            // DOM元素引用
-            const containers = {
-                loading: document.querySelector('.loading-indicator'),
-                content: document.querySelector('.markdown-container'),
-                error: document.querySelector('.error-message')
-            };
-
-            // 消息处理函数
-            function handleMessage(message) {
+            // 核心渲染函数
+            function renderContent(raw) {
                 try {
-                    containers.loading.style.display = 'block';
-                    containers.error.textContent = '';
+                    debugLog("收到原始内容：" + raw.substring(0, 50) + "...");
                     
-                    // 异步解析防止阻塞
-                    setTimeout(() => {
-                        const html = marked.parse(message.toString());
-                        containers.content.innerHTML = html;
-                        containers.loading.style.display = 'none';
-                        
-                        // 图片加载容错
-                        Array.from(containers.content.querySelectorAll('img')).forEach(img => {
-                            img.onerror = function() {
-                                this.style.display = 'none';
-                            };
-                        });
-                    }, 50);
-                } catch (error) {
-                    containers.loading.style.display = 'none';
-                    containers.error.textContent = `内容解析错误: ${error.message}`;
-                    console.error('Markdown解析错误:', error);
+                    const html = marked.parse(raw);
+                    debugLog("Markdown转换完成，HTML长度：" + html.length);
+                    
+                    document.getElementById('content-container').innerHTML = html;
+                    debugLog("内容已注入DOM");
+                    
+                } catch (e) {
+                    debugLog("发生错误：" + e.message);
+                    document.getElementById('content-container').innerHTML = 
+                        `<div style="color:red;padding:20px;">渲染错误：${e.message}</div>`;
                 }
             }
 
-            // 初始化消息监听
+            // 初始化事件监听
             document.addEventListener('DOMContentLoaded', () => {
-                ThunkableWebviewerExtension.receiveMessage(handleMessage);
+                debugLog("DOM准备就绪");
                 
-                // 超时检测
-                setTimeout(() => {
-                    if (!containers.content.innerHTML && !containers.error.textContent) {
-                        containers.error.textContent = '内容加载超时，请检查网络连接';
-                    }
-                }, 10000);
+                // 注册消息监听
+                if (typeof ThunkableWebviewerExtension !== 'undefined') {
+                    debugLog("检测到Thunkable扩展");
+                    
+                    ThunkableWebviewerExtension.receiveMessage((message) => {
+                        debugLog("接收到消息");
+                        renderContent(message);
+                    });
+                    
+                } else {
+                    debugLog("错误：未找到Thunkable扩展");
+                    document.getElementById('content-container').innerHTML = 
+                        "未检测到Thunkable运行时环境";
+                }
             });
 
-            // 视口变化监听
-            window.addEventListener('resize', () => {
-                containers.content.style.fontSize = 
-                    window.innerWidth < 480 ? '16px' : '18px';
-            });
+            // 超时检测
+            setTimeout(() => {
+                if (!document.getElementById('content-container').innerHTML) {
+                    debugLog("超时：未收到任何内容");
+                    document.getElementById('content-container').innerHTML = 
+                        "等待内容超时，请检查数据连接";
+                }
+            }, 5000);
+
         })();
     </script>
 </body>
