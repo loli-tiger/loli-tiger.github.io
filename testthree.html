@@ -2,150 +2,77 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* 新增交互状态样式 */
+        /* 修复版加载提示样式 */
         .thinking-indicator {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 14px;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 15px;
             display: none;
             align-items: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
-            z-index: 1000;
+            z-index: 9999; /* 确保最高层级 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .thinking-indicator::after {
             content: "";
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin-left: 10px;
-            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            margin-left: 12px;
             border: 2px solid #fff;
             border-color: #fff transparent #fff transparent;
-            animation: thinking-rotate 1.2s linear infinite;
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
         }
 
-        @keyframes thinking-rotate {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        /* 错误提示优化 */
-        .error-alert {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #ffeef0;
-            border: 1px solid #ffdce0;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 300px;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <main class="markdown-body"></main>
     <div class="thinking-indicator">思考中...</div>
-    <div class="error-alert"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
-
+    
     <script>
         (function() {
             'use strict';
-
-            const UI = {
-                main: document.querySelector('.markdown-body'),
-                thinking: document.querySelector('.thinking-indicator'),
-                error: document.querySelector('.error-alert')
-            };
-
-            let timeoutId = null;
-
-            // 显示加载状态
+            
+            // 初始化组件引用
+            const thinkingIndicator = document.querySelector('.thinking-indicator');
+            
+            // 增强显示函数
             function showThinking() {
-                UI.thinking.style.display = 'flex';
-                UI.error.style.display = 'none';
+                console.log('[DEBUG] 显示加载提示');
+                thinkingIndicator.style.display = 'flex';
+                thinkingIndicator.offsetHeight; // 强制重绘
             }
-
-            // 隐藏加载状态
-            function hideThinking() {
-                UI.thinking.style.display = 'none';
-            }
-
-            // 显示错误（带自动消失）
-            function showError(msg, duration=5000) {
-                UI.error.innerHTML = msg;
-                UI.error.style.display = 'block';
+            
+            // 消息处理模拟测试
+            function simulateMessage() {
+                showThinking();
                 setTimeout(() => {
-                    UI.error.style.display = 'none';
-                }, duration);
+                    thinkingIndicator.style.display = 'none';
+                }, 2000);
             }
-
-            // 增强型消息处理器
-            function processContent(raw) {
-                try {
-                    showThinking();
-                    resetTimeout();
-
-                    requestAnimationFrame(() => {
-                        try {
-                            if (!raw.trim()) throw new Error('空内容');
-                            
-                            UI.main.innerHTML = marked.parse(raw);
-                            postProcess();
-                        } catch(e) {
-                            showError(`内容解析失败: ${e.message}`);
-                        } finally {
-                            hideThinking();
-                            clearTimeout(timeoutId);
-                        }
-                    });
-                    
-                } catch (e) {
-                    showError(`系统错误: ${e.message}`);
-                    hideThinking();
-                }
-            }
-
-            // DOM后处理
-            function postProcess() {
-                // 图片处理
-                UI.main.querySelectorAll('img').forEach(img => {
-                    img.loading = 'lazy';
-                    img.onerror = () => img.alt = '图片加载失败';
-                });
-
-                // 链接安全处理
-                UI.main.querySelectorAll('a').forEach(a => {
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                });
-            }
-
-            // 超时控制
-            function resetTimeout() {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    showError('内容加载超时，请检查网络连接');
-                    hideThinking();
-                }, 8000); // 8秒超时
-            }
-
-            // 初始化消息监听
-            ThunkableWebviewerExtension.receiveMessage((msg) => {
-                processContent(msg);
+            
+            // 自动测试：页面加载后显示提示
+            document.addEventListener('DOMContentLoaded', () => {
+                simulateMessage(); // 自动测试显示
             });
-
         })();
     </script>
 </body>
