@@ -5,24 +5,26 @@
 <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
 </head>
 <body>
-你好吗？?？
+你好吗？?？?
     <span id="content"></span>
     <script type="text/javascript">
         // 监听来自Thunkable应用的消息
         // when we get a message from the app, display it on the page
     ThunkableWebviewerExtension.receiveMessage(function(message) {
   // Do something with your message
-    alert(message)
+    var markdown = message;
+    var html = marked.parse(markdown);
+    document.getElementById('content').innerHTML = html;
     });
-        window.addEventListener('message', function(event) {
+   //     window.addEventListener('message', function(event) {
             // 接收Markdown内容
-            var markdown = event.data;
+ //           var markdown = event.data;
             
             // 将Markdown转换为HTML
-            var html = marked.parse(markdown);
+   //         var html = marked.parse(markdown);
             
             // 显示HTML内容
-            document.getElementById('content').innerHTML = html;
+     //       document.getElementById('content').innerHTML = html;
         });
     </script>
 </body>
