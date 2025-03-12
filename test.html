@@ -6,4 +6,15 @@
 <body>
 你好
 </body>
+        <script type="text/javascript">
+         ThunkableWebviewerExtension.receiveMessageWithReturnValue(function(message, callback) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+             callback(response);
+              });
+         ThunkableWebviewerExtension.receiveMessage(function(message) {
+             const response = 'demo: ' + message;
+             document.getElementById('messageDisplay').innerText = response;
+              });
+        </script>
 </html>
