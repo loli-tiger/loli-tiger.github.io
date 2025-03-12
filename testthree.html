@@ -3,76 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 紧急调试样式 -->
     <style>
-        /* 修复版加载提示样式 */
-        .thinking-indicator {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 15px;
-            display: none;
-            align-items: center;
-            z-index: 9999; /* 确保最高层级 */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-            animation: fadeIn 0.3s ease;
+        * {
+            border: 1px solid red !important; /* 元素边界可视化 */
+            background-color: rgba(0,255,0,0.1) !important; /* 背景高亮 */
+        }
+        
+        body {
+            margin: 20px !important;
+            min-height: 100vh !important;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 强制显示所有隐藏元素 */
+        [hidden], [style*="display: none"] {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+
+    <!-- 主样式 -->
+    <style>
+        :root {
+            --text-color: #000000; /* 强制黑色 */
         }
 
-        .thinking-indicator::after {
-            content: "";
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            margin-left: 12px;
-            border: 2px solid #fff;
-            border-color: #fff transparent #fff transparent;
-            border-radius: 50%;
-            animation: spin 1.2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .markdown-body {
+            font-size: 18px !important;
+            color: var(--text-color) !important;
+            line-height: 1.8;
         }
     </style>
 </head>
 <body>
-    <div class="thinking-indicator">思考中...</div>
+    <!-- 调试信息容器 -->
+    <div id="debug-output" style="position:fixed;top:0;left:0;background:white;z-index:9999;padding:10px;"></div>
     
+    <main class="markdown-body"></main>
+
+    <!-- 本地备用资源 -->
+    <script>
+        // 内置marked.min.js备用代码
+        if(typeof marked === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.2/marked.min.js"><\/script>');
+        }
+    </script>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
+
     <script>
         (function() {
             'use strict';
-            
-            // 初始化组件引用
-            const thinkingIndicator = document.querySelector('.thinking-indicator');
-            
-            // 增强显示函数
-            function showThinking() {
-                console.log('[DEBUG] 显示加载提示');
-                thinkingIndicator.style.display = 'flex';
-                thinkingIndicator.offsetHeight; // 强制重绘
+
+            // 调试日志系统
+            const debug = {
+                log: (msg) => {
+                    const output = document.getElementById('debug-output');
+                    output.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+                    console.log(msg);
+                },
+                error: (msg) => debug.log(`<span style="color:red">ERROR: ${msg}</span>`)
+            };
+
+            debug.log('脚本初始化开始');
+
+            // 核心组件引用
+            const elements = {
+                main: document.querySelector('.markdown-body'),
+                debug: document.getElementById('debug-output')
+            };
+
+            // 验证DOM元素
+            if (!elements.main) {
+                debug.error('未找到内容容器');
+                document.body.innerHTML = '<h1 style="color:red">DOM结构损坏</h1>';
+                return;
             }
-            
-            // 消息处理模拟测试
-            function simulateMessage() {
-                showThinking();
-                setTimeout(() => {
-                    thinkingIndicator.style.display = 'none';
-                }, 2000);
+
+            // 强化版消息处理器
+            const messageHandler = (raw) => {
+                debug.log(`收到原始消息，长度：${raw.length}`);
+                
+                try {
+                    // 空内容检测
+                    if (!raw || typeof raw !== 'string') {
+                        throw new Error('无效消息格式');
+                    }
+
+                    // 分步解析验证
+                    const parsed = marked.parse(raw);
+                    debug.log(`Markdown解析完成，输出长度：${parsed.length}`);
+
+                    elements.main.innerHTML = parsed;
+                    debug.log('内容已注入DOM');
+
+                    // 二次验证渲染结果
+                    setTimeout(() => {
+                        if (elements.main.innerHTML.trim() === '') {
+                            debug.error('DOM注入后内容为空');
+                        }
+                    }, 100);
+
+                } catch(e) {
+                    debug.error(`处理失败：${e.message}`);
+                    elements.main.innerHTML = `<pre style="color:red">渲染错误：${e.message}</pre>`;
+                }
+            };
+
+            // 扩展加载验证
+            if (typeof ThunkableWebviewerExtension === 'undefined') {
+                debug.error('Thunkable扩展未加载');
+                elements.main.innerHTML = '<p style="color:red">系统组件加载失败</p>';
+                return;
             }
-            
-            // 自动测试：页面加载后显示提示
-            document.addEventListener('DOMContentLoaded', () => {
-                simulateMessage(); // 自动测试显示
-            });
+
+            // 注册消息监听
+            try {
+                debug.log('尝试注册消息监听');
+                ThunkableWebviewerExtension.receiveMessage(messageHandler);
+                debug.log('消息监听注册成功');
+            } catch(e) {
+                debug.error(`监听注册失败：${e.message}`);
+            }
+
+            // 自动测试
+            setTimeout(() => {
+                debug.log('执行自动测试');
+                messageHandler('## 自动测试\n`测试内容`');
+            }, 3000);
+
         })();
     </script>
 </body>
