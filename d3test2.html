@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>动态改变样式</title>
+<title>testD3-1.html</title>
+<script type="text/javascript" src="http://localhost:8080/spring/js/d3.js"></script>
 </head>
+ 
 <body>
-    <button id="myButton">点击我</button>
-    <script>
-        // 获取元素
-        var button = document.getElementById('myButton');
-        
-        // 修改样式
-        button.style.backgroundColor = 'blue';
-        button.style.color = 'white';
-        button.style.padding = '10px 20px';
-        button.style.border = 'none';
-        button.style.borderRadius = '5px';
-        button.style.cursor = 'pointer';
-    </script>
+    This is my HTML page. <br>
 </body>
+<script type="text/javascript">
+    var dataset = [ 5, 10, 15, 20, 25 ];
+ 
+    d3.select("body").selectAll("p")
+    .data(dataset)
+    .enter()
+    .append("p")
+    .text("New paragraph!");
+</script>
 </html>
