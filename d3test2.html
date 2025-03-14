@@ -14,12 +14,12 @@
 <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 </head>
 <body>
-    <span>6</span>
+    <span>7</span>
 </body>
 <script type="text/javascript">
 var dataset = d3.range(25).map(function(){
     return d3.round(d3.random.normal(15,8)(),1);
-})
+});
     d3.select("body").selectAll("div").data(dataset).enter().append("div")
           .attr("class", "bar")
           .style("height", function(d) {
