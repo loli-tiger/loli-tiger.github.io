@@ -1,15 +1,21 @@
-
+<!DOCTYPE html>
 <html>
-    <span>好</span>
-    <head>
-       <meta charset="utf-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1">
-       <title>D3测试</title>
-       <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
-    </head>
-
-    <script type="text/javascript">
-        d3.select("body").append("p").text("New paragraph!");     
+<head>
+    <title>动态改变样式</title>
+</head>
+<body>
+    <button id="myButton">点击我</button>
+    <script>
+        // 获取元素
+        var button = document.getElementById('myButton');
+        
+        // 修改样式
+        button.style.backgroundColor = 'blue';
+        button.style.color = 'white';
+        button.style.padding = '10px 20px';
+        button.style.border = 'none';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
     </script>
-
+</body>
 </html>
