@@ -2,25 +2,29 @@
 <html>
 <head>
 <title>testD3-1.html</title>
+<style type="text/css">
+div.bar {
+    display: inline-block;
+    width: 20px;
+    margin-right: 2px;
+    background-color: teal;
+}
+</style>
+
 <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 </head>
 <body>
-    <span>3</span>
+    <span>4</span>
 </body>
 <script type="text/javascript">
     var dataset = [ 5, 10, 15, 20, 25 ];
  
-    d3.select("body").selectAll("z").data(dataset).enter().append("p")
-        .text(function(d) {
-            return "I can count up to " + d;
-        })
-        .style("color", function(d) {
-            if (d > 15) { //大于15的数字显示为红色
-                return "red";
-            } else {
-                return "black";
-            }
-        });
+    d3.select("body").selectAll("p").data(dataset).enter().append("p")
+          .attr("class", "bar")
+          .style("height", function(d) {
+              return (d * 5) + "px";
+       });
+
 </script>
 </body>
 </html>
