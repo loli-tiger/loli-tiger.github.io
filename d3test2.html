@@ -5,12 +5,12 @@
 <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 </head>
 <body>
-    <span>2</span>
+    <span>3</span>
 </body>
 <script type="text/javascript">
     var dataset = [ 5, 10, 15, 20, 25 ];
  
-    d3.select("body").selectAll("z").data(dataset).enter().append("z")
+    d3.select("body").selectAll("z").data(dataset).enter().append("p")
         .text(function(d) {
             return "I can count up to " + d;
         })
