@@ -8,6 +8,7 @@
     width: 20px;
     margin-right: 2px;
     background-color: teal;
+    vertical-align: bottom; /* 添加底部对齐 */
 }
 </style>
 
@@ -19,10 +20,14 @@
 var dataset = d3.range(25).map(function(){
     return d3.round(d3.random.normal(15,8)(),1);
 });
-    d3.select("body").selectAll("div").data(dataset).enter().append("div")
+    d3.select("body").selectAll("div")
+      .data(dataset)
+      .enter()
+      .append("div")
           .attr("class", "bar")
           .style("height", function(d) {
-              return (d * 5) + "px";
+              // 确保高度不为负值
+              return (Math.max(0, d) * 5) + "px";
        });
 
 </script>
