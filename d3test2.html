@@ -2,17 +2,19 @@
 <html>
 <head>
 <title>testD3-1.html</title>
-<script type="text/javascript" src="http://localhost:8080/spring/js/d3.js"></script>
+<script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 </head>
  
 <body>
     This is my HTML page. <br>
-    <span id="messageDisplay"></span>
 </body>
 <script type="text/javascript">
     var dataset = [ 5, 10, 15, 20, 25 ];
  
-    var html = d3.select("body").selectAll("p").data(dataset).enter() .append("p").text("New paragraph!");
-    document.getElementById('messageDisplay').innerHTML = html;
+    d3.select("body").selectAll("p")
+    .data(dataset)
+    .enter()
+    .append("p")
+    .text("New paragraph!");
 </script>
 </html>
