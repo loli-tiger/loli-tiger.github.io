@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>testD3-1.html</title>
-<style>
-.bar {
+<meta charset="utf-8">
+<title>testD3-5-dataPower.html</title>
+<script type="text/javascript" src="http://localhost:8080/spring/js/d3.js"></script>
+<style type="text/css">
+ 
+div.bar {
     display: inline-block;
     width: 20px;
     margin-right: 2px;
     background-color: teal;
-    vertical-align: bottom; /* 添加底部对齐 */
 }
+ 
 </style>
-
-<script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 </head>
 <body>
-    <span>8</span>
 <script type="text/javascript">
-var dataset = d3.range(25).map(function(){
-    return d3.round(d3.random.normal(15,8)(),1);
-});
-    d3.select("body").selectAll("div")
-      .data(dataset)
-      .enter()
-      .append("div")
-          .attr("class", "bar")
-          .style("height", function(d) {
-              // 确保高度不为负值
-              return (Math.max(0, d) * 5) + "px";
-       });
-
+ 
+var dataset = [];
+for (var i = 0; i < 25; i++) {
+    var newNumber = Math.round(Math.random() * 30);  //随机生成0-30的整数
+    dataset.push(newNumber);
+}
+ 
+d3.select("body").selectAll("div")
+    .data(dataset)
+    .enter()
+    .append("div")
+    .attr("class", "bar")
+    .style("height", function(d) {
+        return (d * 5) + "px";
+    });
+ 
 </script>
 </body>
 </html>
