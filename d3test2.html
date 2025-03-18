@@ -32,7 +32,7 @@ const y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0]);
 svg.selectAll("rect")
   .data(data)
   .enter().append("rect")
-  .attr("x", d => x(d))
+  .attr("x", d => x(d) + marginLeft)
   .attr("y", d => y(d) - marginBottom)
   .attr("width", x.bandwidth())
   .attr("height", d => height - y(d))
