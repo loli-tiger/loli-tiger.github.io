@@ -11,7 +11,7 @@
     <body>
 
         <script type="text/javascript">
-        const width = 600;
+        const width = 640;
         const height = 400;
         const marginTop = 20;
         const marginRight = 20;
@@ -44,17 +44,6 @@ svg.selectAll("rect")
     d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
   });
 
-    svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(d3.axisBottom(x));
-
-  // Add the y-axis.
-  svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-      .call(d3.axisLeft(y));
-
-  // Return the SVG element.
-  return svg.node();
         </script>
     </body>
 </html>
