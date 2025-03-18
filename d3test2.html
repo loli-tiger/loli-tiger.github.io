@@ -49,7 +49,7 @@ svg.selectAll("rect")
    svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
       .call(d3.axisLeft(y));
-
+   return svg.node();
         </script>
     </body>
 </html>
