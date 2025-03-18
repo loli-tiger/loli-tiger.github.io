@@ -33,11 +33,10 @@ svg.selectAll("rect")
   .data(data)
   .enter().append("rect")
   .attr("x", d => x(d))
-  .attr("y", d => y(d))
+  .attr("y", d => y(d) - marginBottom)
   .attr("width", x.bandwidth())
   .attr("height", d => height - y(d))
   .attr("fill", "steelblue")
-  .attr("transform", `translate(0,${height - marginBottom})`)
   .on("mouseover", function() {
     d3.select(this).attr("fill", "orange");
   })
