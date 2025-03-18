@@ -9,7 +9,7 @@
 </head>
 
     <body>
-        <span>1</span>
+        <span>2</span>
         <script type="text/javascript">
         const width = 350;
         const height = 552;
@@ -26,7 +26,7 @@
 // 数据与比例尺定义
 const data = [4, 8, 15, 16, 23, 42];
 const x = d3.scaleBand().domain(data).range([0, width - marginLeft]).padding(0.1);
-const y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0]);
+const y = d3.scaleLinear().domain([0, d3.max(data)]).range([height - marginBottom, 0]);
 
 // 绘制柱状图
 svg.selectAll("rect")
