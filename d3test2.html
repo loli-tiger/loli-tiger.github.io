@@ -11,6 +11,14 @@
     <body>
 
         <script type="text/javascript">
+        const width = 600;
+        const height = 400;
+
+        // 创建 SVG 容器
+        const svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
 // 数据与比例尺定义
 const data = [4, 8, 15, 16, 23, 42];
 const x = d3.scaleBand().domain(data).range([0, width]);
