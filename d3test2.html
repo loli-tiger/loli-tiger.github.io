@@ -32,12 +32,13 @@ svg.selectAll("rect")
   .attr("y", d => y(d))
   .attr("width", x.bandwidth())
   .attr("height", d => height - y(d))
+  .attr("fill", "steelblue")
   .on("mouseover", function() {
     d3.select(this).attr("fill", "orange");
   })
   .on("mouseout", function() {
-                d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
-            });
+    d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
+  });
         </script>
     </body>
 </html>
