@@ -43,6 +43,12 @@ svg.selectAll("rect")
   .on("mouseout", function() {
     d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
   });
+   svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .call(d3.axisBottom(x));
+   svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(d3.axisLeft(y));
 
         </script>
     </body>
