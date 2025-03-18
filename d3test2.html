@@ -21,7 +21,7 @@
             .attr("height", height);
 // 数据与比例尺定义
 const data = [4, 8, 15, 16, 23, 42];
-const x = d3.scaleBand().domain(data).range([0, width]);
+const x = d3.scaleBand().domain(data).range([0, width]).padding(0.1);
 const y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0]);
 
 // 绘制柱状图
