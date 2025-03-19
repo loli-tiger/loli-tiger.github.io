@@ -19,13 +19,10 @@
     <div id="chart-container"></div>
 
     <script type="text/javascript">
-       
-       // 控制台日志（记录迭代次数）
-       console.log(`目前修改次数:3`);
         // 初始化变量
         let svg;
         let xScale, yScale;
-        let currentWidth = 0;  // 修复1：初始化默认值
+        let currentWidth = 0;
         let currentHeight = 0;
         
         // 边距配置
@@ -38,92 +35,101 @@
 
         // 初始化图表
         function initChart() {
+            // 确保容器存在且可见
+            const container = document.getElementById("chart-container");
+            if (!container || container.clientHeight === 0) {
+                setTimeout(initChart, 100);
+                return;
+            }
+
             svg = d3.select("#chart-container")
                 .append("svg")
                 .style("background", "#fff");
-         
-           // 添加调试框（修改点4）
-            svg.append("rect")
-                .attr("class", "debug-frame")
-                .attr("fill", "none")
-                .attr("stroke", "red")
-                .attr("width", "100%")
-                .attr("height", "100%");
             
-            updateSystem();
+            updateSystem(true); // 强制首次更新
         }
 
-        // 响应式更新系统
-        function updateSystem() {
+        // 响应式更新系统（增强版）
+        function updateSystem(force = false) {
             const container = document.getElementById("chart-container");
-            const width = Math.max(100, container.clientWidth);  // 添加最小值保护
-            const height = Math.max(100, container.clientHeight); // 添加最小值保护
+            if (!container) return;
 
-            // 确保有效数值
-            if (isNaN(width) || isNaN(height)) return;
+            // 获取有效尺寸
+            const width = Math.max(100, container.clientWidth || 0);
+            const height = Math.max(100, container.clientHeight || 0);
+
+            // 尺寸有效性验证
+            if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                console.warn(`Invalid dimensions: ${width}x${height}`);
+                return;
+            }
 
             // 尺寸未变化时跳过更新
-            if (width === currentWidth && height === currentHeight) return;
+            if (!force && width === currentWidth && height === currentHeight) return;
 
-            // 更新SVG视图
-            svg.attr("viewBox", `0 0 ${width} ${height}`);
+            // 更新比例尺（增强保护）
+            try {
+                xScale = d3.scaleBand()
+                    .domain(data.map((_, i) => i))
+                    .range([margin.left, Math.max(margin.left + 10, width - margin.right)])
+                    .padding(0.1);
 
-            // 控制台日志（修改点2）
-            console.log(`Current viewBox: 0 0 ${width} ${height}`);
+                const maxValue = d3.max(data) || 1;
+                yScale = d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range([Math.max(margin.top, height - margin.bottom - 10), margin.top + 10]);
+            } catch (e) {
+                console.error("比例尺初始化失败:", e);
+                return;
+            }
 
-           // 更新比例尺（修复NaN问题）
-            xScale = d3.scaleBand()
-                .domain(d3.range(data.length))  // 使用索引数组[0,1,2,3,4,5]
-                .range([margin.left, Math.max(margin.left + 10, width - margin.right)]) // 防止反向范围
-                .padding(0.1);
+            // 更新视图
+            svg.attr("viewBox", `0 0 ${width} ${height}`)
+               .attr("width", width)
+               .attr("height", height);
 
-            const maxValue = d3.max(data) || 1; // 防止0值问题
-            yScale = d3.scaleLinear()
-                .domain([0, maxValue])
-                .range([Math.max(margin.top + 10, height - margin.bottom), margin.top]); // 确保正向范围
-
-
-            // 性能分析（修改点3）
-            console.time("redraw");
-           
-            // 重绘图形
-            redraw();
-
-            console.timeEnd("redraw");
-
-            // 更新当前尺寸记录
             currentWidth = width;
             currentHeight = height;
+
+            // 重绘图形
+            safeRedraw();
         }
 
-        // 重绘函数
+        // 安全重绘函数
+        function safeRedraw() {
+            try {
+                redraw();
+            } catch (e) {
+                console.error("重绘失败:", e);
+            }
+        }
+
+        // 重绘函数（增强数值校验）
         function redraw() {
-
-            // 确保有效比例尺
             if (!xScale || !yScale) return;
-            // 处理数据绑定（关键改进）
-            const bars = svg.selectAll("rect")
-                .data(data);
 
-            // 处理enter/update/exit（添加数值校验）
-             bars.join(
+            // 带宽安全计算
+            const bandwidth = Number(xScale.bandwidth()) || 0;
+
+            // 处理矩形元素
+            const bars = svg.selectAll("rect")
+                .data(data, (d, i) => i);
+
+            bars.join(
                 enter => enter.append("rect")
                     .attr("fill", "steelblue")
                     .attr("x", (d, i) => {
-                        const val = xScale(i);
-                        return isNaN(val) ? 0 : val;
+                        const xVal = Number(xScale(i)) || 0;
+                        return Math.max(0, xVal);
                     })
                     .attr("y", d => {
-                        const val = yScale(d);
-                        return isNaN(val) ? currentHeight : val;
+                        const yVal = Number(yScale(d)) || currentHeight;
+                        return Math.min(currentHeight - margin.bottom, yVal);
                     })
-                    .attr("width", () => {
-                        const val = xScale.bandwidth();
-                        return isNaN(val) ? 0 : val;
-                    })
+                    .attr("width", bandwidth)
                     .attr("height", d => {
-                        const val = yScale(0) - yScale(d);
-                        return isNaN(val) ? 0 : Math.max(0, val);
+                        const heightVal = Number(yScale(0) - yScale(d)) || 0;
+                        return Math.max(0, heightVal);
                     })
                     .transition()
                     .duration(500)
@@ -132,64 +138,68 @@
                 update => update
                     .transition()
                     .duration(500)
-                    .attr("x", (d, i) => {
-                        const val = xScale(i);
-                        return isNaN(val) ? 0 : val;
-                    })
-                    .attr("width", () => {
-                        const val = xScale.bandwidth();
-                        return isNaN(val) ? 0 : val;
-                    }),
+                    .attr("x", (d, i) => Math.max(0, Number(xScale(i)) || 0))
+                    .attr("width", bandwidth),
                 
                 exit => exit.remove()
             );
-           
-             // 控制台日志（修改点5）
-  console.log({
-  currentWidth,
-  currentHeight,
-  xRange: xScale.range(),
-  yRange: yScale.range(),
-  bandwidth: xScale.bandwidth()
-});
-            // 绘制坐标轴（修复NaN问题）
-            svg.selectAll(".x-axis").remove();
-            svg.selectAll(".y-axis").remove();
 
-            if (currentHeight > margin.bottom) {
-                svg.append("g")
-                    .attr("class", "x-axis")
-                    .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
-                    .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
-            }
+            // 安全绘制坐标轴
+            drawAxis();
+        }
 
-            if (currentWidth > margin.left) {
-                svg.append("g")
-                    .attr("class", "y-axis")
-                    .attr("transform", `translate(${margin.left}, 0)`)
-                    .call(d3.axisLeft(yScale));
+        // 坐标轴绘制（增强保护）
+        function drawAxis() {
+            try {
+                // 清除旧坐标轴
+                svg.selectAll(".x-axis, .y-axis").remove();
+
+                // X轴
+                if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
+                    svg.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
+                        .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
+                }
+
+                // Y轴
+                if (currentWidth > margin.left + 10 && currentHeight > margin.top + margin.bottom) {
+                    svg.append("g")
+                        .attr("class", "y-axis")
+                        .attr("transform", `translate(${margin.left}, 0)`)
+                        .call(d3.axisLeft(yScale));
+                }
+            } catch (e) {
+                console.error("坐标轴绘制失败:", e);
             }
         }
 
         // 数据定义
         const data = [4, 8, 15, 16, 23, 42];
 
-        // 初始化执行（添加延迟确保容器存在）
-        setTimeout(initChart, 50);
+        // 安全初始化
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(initChart, 100);
+        });
 
-        // 窗口事件监听，添加防抖（修改点1）
+        // 窗口事件监听（增强防抖）
         let resizeTimeout;
         const resizeHandler = () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(updateSystem, 100);
+            resizeTimeout = setTimeout(() => {
+                updateSystem();
+                console.log("当前尺寸:", { 
+                    width: currentWidth, 
+                    height: currentHeight,
+                    bandwidth: xScale?.bandwidth(),
+                    yRange: yScale?.range()
+                });
+            }, 200);
         };
 
-        // 添加屏幕旋转监听
-        const portraitMedia = window.matchMedia("(orientation: portrait)");
-        portraitMedia.addListener(resizeHandler);
-        
-        // 添加常规resize监听
+        // 事件监听
         window.addEventListener("resize", resizeHandler);
+        window.matchMedia("(orientation: portrait)").addListener(resizeHandler);
     </script>
 </body>
 </html>
