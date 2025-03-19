@@ -61,13 +61,14 @@
 </head>
 
 <body>
-   
+      //全屏容器：
    <div id="chart-container" style="width: 100vw; height: 100vh;">
+
       <span>5</span>
    </div> 
    <script>
       // Feel free to change or delete any of the code you see in this editor!
-
+//动态尺寸获取函数：
 function getContainerSize() {
   const container = document.getElementById("chart-container");
   return {
@@ -75,16 +76,16 @@ function getContainerSize() {
     height: container.clientHeight
   };
 } 
-      
+   //自适应 SVG 创建：   
  var svg = d3.select("#chart-container").append("svg")
 // .attr("width", 383)
 // .attr("height", 552);
 //      .attr("viewBox", [0, 0, width, height])
     .attr("viewBox", `0 0 ${getContainerSize().width} ${getContainerSize().height}`)
-      .attr("width", width)
-      .attr("height", height)
-      .style("max-width", "100%")
-      .style("height", "auto")
+//    .attr("width", width)
+//   .attr("height", height)
+//     .style("max-width", "100%")
+//      .style("height", "auto")
       .style("background", "#f5f5f5");
   
       svg.append("rect")
