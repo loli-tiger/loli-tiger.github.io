@@ -56,6 +56,9 @@
             const width = Math.max(100, container.clientWidth);  // 添加最小值保护
             const height = Math.max(100, container.clientHeight); // 添加最小值保护
 
+            // 确保有效数值
+            if (isNaN(width) || isNaN(height)) return;
+
             // 尺寸未变化时跳过更新
             if (width === currentWidth && height === currentHeight) return;
 
