@@ -87,6 +87,7 @@
                     .attr("height", 0)
                     .transition()
                     .duration(500)
+                   //缓动函数
                     .ease(d3.easeCubicInOut) 
                     .attr("y", d => yScale(d))
                     .attr("height", d => yScale(0) - yScale(d)),
