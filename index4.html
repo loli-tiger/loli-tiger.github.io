@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>testD3-5-dataPower.html</title>
+<title>Responsive D3 Bar Chart</title>
 <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
 <style> 
     * { margin: 0; padding: 0; }
@@ -15,72 +15,119 @@
 </style>
 </head>
 
-    <body>
-        <div id="chart-container"></div>
+<body>
+    <div id="chart-container"></div>
 
-        <script type="text/javascript">
-  
-         // svg初始化
-    const svg = d3.select("#chart-container")
-      .append("svg")
-      .style("background", "#fff");
+    <script type="text/javascript">
+        // 初始化变量
+        let svg;
+        let xScale, yScale;
+        let currentWidth, currentHeight;
+        
+        // 边距配置
+        const margin = {
+            top: 20,
+            right: 20,
+            bottom: 30,
+            left: 40
+        };
+
+        // 初始化图表
+        function initChart() {
+            svg = d3.select("#chart-container")
+                .append("svg")
+                .style("background", "#fff");
+            
+            updateSystem();
+        }
+
+        // 响应式更新系统
+        function updateSystem() {
+            const container = document.getElementById("chart-container");
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 尺寸未变化时跳过更新
+            if (width === currentWidth && height === currentHeight) return;
+
+            // 更新SVG视图
+            svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+            // 更新比例尺（重要修正点）
+            xScale = d3.scaleBand()
+                .domain(data.map((_, i) => i))  // 使用索引作为domain
+                .range([margin.left, width - margin.right])
+                .padding(0.1);
+
+            yScale = d3.scaleLinear()
+                .domain([0, d3.max(data)])
+                .range([height - margin.bottom, margin.top]);
+
+            // 重绘图形
+            redraw();
+
+            // 更新当前尺寸记录
+            currentWidth = width;
+            currentHeight = height;
+        }
+
+        // 重绘函数
+        function redraw() {
+            // 处理数据绑定（关键改进）
+            const bars = svg.selectAll("rect")
+                .data(data);
+
+            // 处理enter/update/exit
+            bars.join(
+                enter => enter.append("rect")
+                    .attr("fill", "steelblue")
+                    .attr("x", (d, i) => xScale(i))
+                    .attr("y", height => yScale(height))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", 0)
+                    .transition()
+                    .duration(500)
+                    .attr("y", d => yScale(d))
+                    .attr("height", d => yScale(0) - yScale(d)),
+                
+                update => update
+                    .transition()
+                    .duration(500)
+                    .attr("x", (d, i) => xScale(i))
+                    .attr("y", d => yScale(d))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", d => yScale(0) - yScale(d)),
+                
+                exit => exit.remove()
+            );
+
+            // 绘制坐标轴（重要修正）
+            svg.selectAll(".x-axis").remove();
+            svg.selectAll(".y-axis").remove();
+
+            svg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
+                .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
+
+            svg.append("g")
+                .attr("class", "y-axis")
+                .attr("transform", `translate(${margin.left}, 0)`)
+                .call(d3.axisLeft(yScale));
+        }
+
         // 数据定义
-    const data = [4, 8, 15, 16, 23, 42];
-        // 比例尺系统
-    let xScale, yScale;
-        // 响应式更新
-    let currentWidth, currentHeight;
-    const margin = { marginTop: 20, marginRight: 20, marginBottom: 30, marginLeft: 20 };
-    function updateSystem() {
-    const container = document.getElementById("chart-container");
-    return {
-    width: container.clientWidth,
-    height: container.clientHeight
-    if (width === currentWidth && height === currentHeight) return;
-       // 更新viewBox
-      svg.attr("viewBox", `0 0 ${width} ${height}`);
-           };
-       // 更新比例尺
-      const xScale = d3.scaleBand().domain(data).range([0, width - margin.marginLeft]).padding(0.1);
-      const yScale = d3.scaleLinear().domain([0, d3.max(data)]).range([height - margin.marginBottom, 0]);  
-      // 重绘图形
-      redraw();
-      currentWidth = width;
-      currentHeight = height;
-    }   
-function redraw() {
-// 绘制柱状图
-svg.selectAll("rect")
-  .data(data)
-  .enter().append("rect")
-  .attr("x", d => xScale(d) + margin.marginLeft)
-  .attr("y", d => yScale(d) - margin.marginBottom)
-  .attr("width", xScale.bandwidth())
-  .attr("height", d => height - yScale(d))
-  .attr("fill", "steelblue")
-  .on("mouseover", function() {
-    d3.select(this).attr("fill", "orange");
-  })
-  .on("mouseout", function() {
-    d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
-  });
- // 绘制坐标轴
-   svg.selectAll(".axis").remove();
-   svg.append("g")
-      .attr("transform", `translate(${margin.marginLeft},${height - margin.marginBottom})`)
-      .call(d3.axisBottom(x));
-   svg.append("g")
-      .attr("transform", `translate(${margin.marginLeft},0)`)
-      .call(d3.axisLeft(y));
-    }
-    // 初始化执行
-    updateSystem();
-   // 窗口resize监听
-    window.addEventListener("resize", () => {
-      let timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(updateSystem, 100);
-    });
-        </script>
-    </body>
+        const data = [4, 8, 15, 16, 23, 42];
+
+        // 初始化执行
+        initChart();
+
+        // 窗口resize监听（添加防抖）
+        let resizeTimeout;
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(updateSystem, 100);
+        });
+    </script>
+</body>
 </html>
