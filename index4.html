@@ -37,6 +37,14 @@
             svg = d3.select("#chart-container")
                 .append("svg")
                 .style("background", "#fff");
+         
+           // 添加调试框（修改点4）
+            svg.append("rect")
+                .attr("class", "debug-frame")
+                .attr("fill", "none")
+                .attr("stroke", "red")
+                .attr("width", "100%")
+                .attr("height", "100%");
             
             updateSystem();
         }
@@ -53,6 +61,9 @@
             // 更新SVG视图
             svg.attr("viewBox", `0 0 ${width} ${height}`);
 
+            // 控制台日志（修改点2）
+            console.log(`Current viewBox: 0 0 ${width} ${height}`);
+
             // 更新比例尺（重要修正点）
             xScale = d3.scaleBand()
                 .domain(data.map((_, i) => i))  // 使用索引作为domain
@@ -63,8 +74,14 @@
                 .domain([0, d3.max(data)])
                 .range([height - margin.bottom, margin.top]);
 
+
+            // 性能分析（修改点3）
+            console.time("redraw");
+           
             // 重绘图形
             redraw();
+
+            console.timeEnd("redraw");
 
             // 更新当前尺寸记录
             currentWidth = width;
@@ -124,12 +141,19 @@
         // 初始化执行
         initChart();
 
-        // 窗口resize监听（添加防抖）
+        // 窗口事件监听，添加防抖（修改点1）
         let resizeTimeout;
-        window.addEventListener("resize", () => {
+        const resizeHandler = () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(updateSystem, 100);
-        });
+        };
+
+        // 添加屏幕旋转监听
+        const portraitMedia = window.matchMedia("(orientation: portrait)");
+        portraitMedia.addListener(resizeHandler);
+        
+        // 添加常规resize监听
+        window.addEventListener("resize", resizeHandler);
     </script>
 </body>
 </html>
