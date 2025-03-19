@@ -16,45 +16,47 @@
 </head>
 
     <body>
-        //设置全屏容器：
         <div id="chart-container"></div>
 
         <script type="text/javascript">
-
+  
+         // svg初始化
+    const svg = d3.select("#chart-container")
+      .append("svg")
+      .style("background", "#fff");
+        // 数据定义
+    const data = [4, 8, 15, 16, 23, 42];
+        // 比例尺系统
+    let xScale, yScale;
         // 响应式更新
     let currentWidth, currentHeight;
-    function getContainerSize() {
+    const margin = { marginTop: 20, marginRight: 20, marginBottom: 30, marginLeft: 20 };
+    function updateSystem() {
     const container = document.getElementById("chart-container");
     return {
     width: container.clientWidth,
     height: container.clientHeight
+    if (width === currentWidth && height === currentHeight) return;
+       // 更新viewBox
+      svg.attr("viewBox", `0 0 ${width} ${height}`);
            };
+       // 更新比例尺
+      const xScale = d3.scaleBand().domain(data).range([0, width - margin.marginLeft]).padding(0.1);
+      const yScale = d3.scaleLinear().domain([0, d3.max(data)]).range([height - margin.marginBottom, 0]);  
+      // 重绘图形
+      redraw();
+      currentWidth = width;
+      currentHeight = height;
     }   
-
-        const marginTop = 20;
-        const marginRight = 20;
-        const marginBottom = 30;
-        const marginLeft = 20;
-
-        //自适应 SVG 创建： 
-    // svg初始化
-    const svg = d3.select("#chart-container")
-      .append("svg")
-      .style("background", "#fff");
-
-            // 数据与比例尺定义
-const data = [4, 8, 15, 16, 23, 42];
-const x = d3.scaleBand().domain(data).range([0, width - marginLeft]).padding(0.1);
-const y = d3.scaleLinear().domain([0, d3.max(data)]).range([height - marginBottom, 0]);
-
+function redraw() {
 // 绘制柱状图
 svg.selectAll("rect")
   .data(data)
   .enter().append("rect")
-  .attr("x", d => x(d) + marginLeft)
-  .attr("y", d => y(d) - marginBottom)
-  .attr("width", x.bandwidth())
-  .attr("height", d => height - y(d))
+  .attr("x", d => xScale(d) + margin.marginLeft)
+  .attr("y", d => yScale(d) - margin.marginBottom)
+  .attr("width", xScale.bandwidth())
+  .attr("height", d => height - yScale(d))
   .attr("fill", "steelblue")
   .on("mouseover", function() {
     d3.select(this).attr("fill", "orange");
@@ -62,13 +64,23 @@ svg.selectAll("rect")
   .on("mouseout", function() {
     d3.select(this).attr("fill", "steelblue"); // 鼠标离开时恢复颜色
   });
+ // 绘制坐标轴
+   svg.selectAll(".axis").remove();
    svg.append("g")
-      .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
+      .attr("transform", `translate(${margin.marginLeft},${height - margin.marginBottom})`)
       .call(d3.axisBottom(x));
    svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
+      .attr("transform", `translate(${margin.marginLeft},0)`)
       .call(d3.axisLeft(y));
-       
+    }
+    // 初始化执行
+    updateSystem();
+   // 窗口resize监听
+    window.addEventListener("resize", () => {
+      let timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(updateSystem, 100);
+    });
         </script>
     </body>
 </html>
