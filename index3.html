@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <head>
    <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">  //移动端优化
    <script src="https://d3js.org/d3.v5.min.js"></script>
    <style>
    text{
@@ -51,25 +51,39 @@
     path.domain{
        display: none;
     }
+    * { margin: 0; padding: 0; }
+    #chart-container {
+      width: 100vw;
+      height: 100vh;
+      background: #f0f0f0;
+    }
    </style>
 </head>
 
 <body>
-   <span>2</span>
+   <span>3</span>
+   <div id="chart-container" style="width: 100vw; height: 100vh;"></div>  //全屏容器
    <script>
       // Feel free to change or delete any of the code you see in this editor!
 
-
+function getContainerSize() {
+  const container = document.getElementById("chart-container");
+  return {
+    width: container.clientWidth,
+    height: container.clientHeight
+  };
+} //动态尺寸获取函数
       
- var svg = d3.select("body").append("svg")
+ var svg = d3.select("#chart-container").append("svg")
 // .attr("width", 383)
 // .attr("height", 552);
-      .attr("viewBox", [0, 0, width, height])
+//      .attr("viewBox", [0, 0, width, height])
+    .attr("viewBox", `0 0 ${getContainerSize().width} ${getContainerSize().height}`)
       .attr("width", width)
       .attr("height", height)
       .style("max-width", "100%")
       .style("height", "auto")
-      .style("background", "#fff");
+      .style("background", "#f5f5f5");
   
       svg.append("rect")
   .attr("fill", "none")
