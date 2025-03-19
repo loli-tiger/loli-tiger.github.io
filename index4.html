@@ -68,15 +68,16 @@
             // 控制台日志（修改点2）
             console.log(`Current viewBox: 0 0 ${width} ${height}`);
 
-            // 更新比例尺（重要修正点）
+           // 更新比例尺（修复NaN问题）
             xScale = d3.scaleBand()
-                .domain(data.map((_, i) => i))  // 使用索引作为domain
-                .range([margin.left, width - margin.right])
+                .domain(d3.range(data.length))  // 使用索引数组[0,1,2,3,4,5]
+                .range([margin.left, Math.max(margin.left + 10, width - margin.right)]) // 防止反向范围
                 .padding(0.1);
 
+            const maxValue = d3.max(data) || 1; // 防止0值问题
             yScale = d3.scaleLinear()
-                .domain([0, d3.max(data)])
-                .range([height - margin.bottom, margin.top]);
+                .domain([0, maxValue])
+                .range([Math.max(margin.top + 10, height - margin.bottom), margin.top]); // 确保正向范围
 
 
             // 性能分析（修改点3）
