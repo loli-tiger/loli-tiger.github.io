@@ -19,6 +19,9 @@
     <div id="chart-container"></div>
 
     <script type="text/javascript">
+       
+       // 控制台日志（记录迭代次数）
+       console.log(`目前修改次数:2`);
         // 初始化变量
         let svg;
         let xScale, yScale;
@@ -95,59 +98,79 @@
 
         // 重绘函数
         function redraw() {
+
+            // 确保有效比例尺
+            if (!xScale || !yScale) return;
             // 处理数据绑定（关键改进）
             const bars = svg.selectAll("rect")
                 .data(data);
 
-            // 处理enter/update/exit
-            bars.join(
+            // 处理enter/update/exit（添加数值校验）
+             bars.join(
                 enter => enter.append("rect")
                     .attr("fill", "steelblue")
-                    .attr("x", (d, i) => xScale(i))
-                    .attr("y", d => yScale(d))
-                    .attr("width", xScale.bandwidth())
-                    .attr("height", 0)
+                    .attr("x", (d, i) => {
+                        const val = xScale(i);
+                        return isNaN(val) ? 0 : val;
+                    })
+                    .attr("y", d => {
+                        const val = yScale(d);
+                        return isNaN(val) ? currentHeight : val;
+                    })
+                    .attr("width", () => {
+                        const val = xScale.bandwidth();
+                        return isNaN(val) ? 0 : val;
+                    })
+                    .attr("height", d => {
+                        const val = yScale(0) - yScale(d);
+                        return isNaN(val) ? 0 : Math.max(0, val);
+                    })
                     .transition()
                     .duration(500)
-                   //缓动函数
-                    .ease(d3.easeCubicInOut) 
-                    .attr("y", d => yScale(d))
-                    .attr("height", d => yScale(0) - yScale(d)),
+                    .ease(d3.easeCubicInOut),
                 
                 update => update
                     .transition()
                     .duration(500)
-                    .attr("x", (d, i) => xScale(i))
-                    .attr("y", d => yScale(d))
-                    .attr("width", xScale.bandwidth())
-                    .attr("height", d => yScale(0) - yScale(d)),
+                    .attr("x", (d, i) => {
+                        const val = xScale(i);
+                        return isNaN(val) ? 0 : val;
+                    })
+                    .attr("width", () => {
+                        const val = xScale.bandwidth();
+                        return isNaN(val) ? 0 : val;
+                    }),
                 
                 exit => exit.remove()
             );
+           
+             // 控制台日志（修改点5）
+            console.log(`currentHeight: ${currentHeight}`);
 
-            // 绘制坐标轴（重要修正）
+            // 绘制坐标轴（修复NaN问题）
             svg.selectAll(".x-axis").remove();
             svg.selectAll(".y-axis").remove();
 
-            // 控制台日志（修改点5）
-            console.log(`currentHeight: ${currentHeight}`);
+            if (currentHeight > margin.bottom) {
+                svg.append("g")
+                    .attr("class", "x-axis")
+                    .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
+                    .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
+            }
 
-            svg.append("g")
-                .attr("class", "x-axis")
-                .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
-                .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
-
-            svg.append("g")
-                .attr("class", "y-axis")
-                .attr("transform", `translate(${margin.left}, 0)`)
-                .call(d3.axisLeft(yScale));
+            if (currentWidth > margin.left) {
+                svg.append("g")
+                    .attr("class", "y-axis")
+                    .attr("transform", `translate(${margin.left}, 0)`)
+                    .call(d3.axisLeft(yScale));
+            }
         }
 
         // 数据定义
         const data = [4, 8, 15, 16, 23, 42];
 
-        // 初始化执行
-        initChart();
+        // 初始化执行（添加延迟确保容器存在）
+        setTimeout(initChart, 50);
 
         // 窗口事件监听，添加防抖（修改点1）
         let resizeTimeout;
