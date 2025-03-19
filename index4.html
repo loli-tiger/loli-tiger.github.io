@@ -21,7 +21,7 @@
     <script type="text/javascript">
        
        // 控制台日志（记录迭代次数）
-       console.log(`目前修改次数:2`);
+       console.log(`目前修改次数:3`);
         // 初始化变量
         let svg;
         let xScale, yScale;
@@ -145,8 +145,13 @@
             );
            
              // 控制台日志（修改点5）
-            console.log(`currentHeight: ${currentHeight}`);
-
+  console.log({
+  currentWidth,
+  currentHeight,
+  xRange: xScale.range(),
+  yRange: yScale.range(),
+  bandwidth: xScale.bandwidth()
+});
             // 绘制坐标轴（修复NaN问题）
             svg.selectAll(".x-axis").remove();
             svg.selectAll(".y-axis").remove();
