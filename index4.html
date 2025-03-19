@@ -82,7 +82,7 @@
                 enter => enter.append("rect")
                     .attr("fill", "steelblue")
                     .attr("x", (d, i) => xScale(i))
-                    .attr("y", height => yScale(height))
+                    .attr("y", d => yScale(d))
                     .attr("width", xScale.bandwidth())
                     .attr("height", 0)
                     .transition()
