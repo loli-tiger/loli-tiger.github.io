@@ -125,6 +125,9 @@
             svg.selectAll(".x-axis").remove();
             svg.selectAll(".y-axis").remove();
 
+            // 控制台日志（修改点5）
+            console.log(`currentHeight: ${currentHeight}`);
+
             svg.append("g")
                 .attr("class", "x-axis")
                 .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
