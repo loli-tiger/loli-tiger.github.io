@@ -55,7 +55,7 @@
 
             // 更新比例尺（重要修正点）
             xScale = d3.scaleBand()
-                .domain(data.map((_, i) => _))  // 使用索引作为domain
+                .domain(data.map((_, i) => i))  // 使用索引作为domain
                 .range([margin.left, width - margin.right])
                 .padding(0.1);
 
