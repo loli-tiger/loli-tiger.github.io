@@ -77,13 +77,13 @@
             try {
                 xScale = d3.scaleBand()
                     .domain(data.map((_, i) => i))
-                    .range([0, Math.max(0, width - margin.left - margin.right)])
+                    .range([margin.left, Math.max(margin.left + 10, width - margin.right)])
                     .padding(0.1);
 
                 const maxValue = d3.max(data) || 1;
                 yScale = d3.scaleLinear()
                     .domain([0, maxValue])
-                    .range([currentHeight - margin.bottom, margin.top]);
+                    .range([Math.max(margin.top, height - margin.bottom - 10), margin.top + 10]);
             } catch (e) {
                 console.error("比例尺初始化失败:", e);
                 return;
@@ -134,7 +134,7 @@
              // ↑↑↑ 事件监听结束 ↑↑↑
                     .attr("x", (d, i) => {
                         const xVal = Number(xScale(i)) || 0;
-                        return margin.left + Math.max(0, xVal);
+                        return Math.max(0, xVal);
                     })
                     .attr("y", d => {
                         const yVal = Number(yScale(d)) || currentHeight;
@@ -173,7 +173,7 @@
                 if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
                     svg.append("g")
                         .attr("class", "x-axis")
-                        .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
+                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
                         .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
                 }
 
@@ -184,9 +184,6 @@
                         .attr("transform", `translate(${margin.left}, 0)`)
                         .call(d3.axisLeft(yScale));
                 }
-               //添加对齐修正
-            svg.selectAll(".domain")
-            .attr("transform", "translate(0.5,0.5)");
             } catch (e) {
                 console.error("坐标轴绘制失败:", e);
             }
@@ -206,7 +203,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验5次，当前尺寸:", { 
+                console.log("试验6次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
