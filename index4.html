@@ -20,7 +20,7 @@
 
     <script type="text/javascript">
 
-       console.log("当前试验次数4");
+       console.log("当前试验次数5");
 
         // 初始化变量
         let svg;
@@ -28,12 +28,7 @@
         let currentWidth ;
         let currentHeight;
 
-                         console.log("当前试验次数1，当前尺寸:", { 
-                    currentwidth: currentWidth, 
-                     currentheight: currentHeight,
-                     currentbandwidth: xScale?.bandwidth(),
-                     currentyRange: yScale?.range()
-                });
+
         // 边距配置
         const margin = {
             top: 20,
@@ -54,8 +49,24 @@
             svg = d3.select("#chart-container")
                 .append("svg")
                 .style("background", "#fff");
+
+                           console.log("当前尺寸:", { 
+                   container: container,
+                    width: currentWidth, 
+                    height: currentHeight,
+                    bandwidth: xScale?.bandwidth(),
+                    yRange: yScale?.range()
+                });
             
             updateSystem(true); // 强制首次更新
+
+                        console.log("当前尺寸:", { 
+                   container: container,
+                    width: currentWidth, 
+                    height: currentHeight,
+                    bandwidth: xScale?.bandwidth(),
+                    yRange: yScale?.range()
+                });
         }
 
         // 响应式更新系统（增强版）
