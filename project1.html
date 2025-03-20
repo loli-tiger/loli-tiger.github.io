@@ -204,7 +204,7 @@
                 update => update
                     .transition()
                // MD推荐时长范围(200-500ms)
-                    .duration(300)  
+                    .duration(600)  
                     .attr("x", (d, i) => Math.max(0, Number(xScale(i)) || 0))
                     .attr("width", bandwidth),
                 
@@ -290,7 +290,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验15次，当前尺寸:", { 
+                console.log("试验16次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
