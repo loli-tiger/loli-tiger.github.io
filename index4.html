@@ -19,6 +19,13 @@
     <div id="chart-container"></div>
 
     <script type="text/javascript">
+
+                  console.log("当前试验次数1，当前尺寸:", { 
+                    width: currentWidth, 
+                    height: currentHeight,
+                    bandwidth: xScale?.bandwidth(),
+                    yRange: yScale?.range()
+                });
         // 初始化变量
         let svg;
         let xScale, yScale;
