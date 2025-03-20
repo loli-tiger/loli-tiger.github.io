@@ -154,7 +154,7 @@
                 .data(data, (d, i) => i);
            
            // 使用Material Design标准缓动曲线
-           const materialEasing = d3.easeCubicBezier(0.4, 0.0, 0.2, 1);
+           const materialEasing = d3.easeCubicInOut;
            // 应用动态颜色
            const textColor = getAccessibleColor("#f0f0f0");
              svg.selectAll("text")
@@ -289,7 +289,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验11次，当前尺寸:", { 
+                console.log("试验12次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
