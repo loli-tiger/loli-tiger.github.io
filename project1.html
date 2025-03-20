@@ -28,16 +28,7 @@
         let currentHeight;
         let layoutConfig;
 
-
-        // 边距配置
-        const margin = {
-            top: 20,
-            right: 20,
-            bottom: 30,
-            left: 40
-        };
-
-         // 定义Material Design标准断点（单位：px）
+       // 定义Material Design标准断点（单位：px）
         const BREAKPOINTS = {
             SMALL: 600,    // 手机
             MEDIUM: 904,   // 平板
@@ -164,6 +155,12 @@
             d3.select(this).attr("fill", "orange");
              })
             .on("mouseout", function() {
+            d3.select(this).attr("fill", "steelblue");
+             })
+            .on("pointerenter touchstart", function() {
+            d3.select(this).attr("fill", "orange");
+             })
+            .on("pointerleave touchend", function() {
             d3.select(this).attr("fill", "steelblue");
              })
              // ↑↑↑ 事件监听结束 ↑↑↑
