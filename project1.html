@@ -210,12 +210,6 @@
                     .transition()
                // MD推荐时长范围(200-500ms)
                     .duration(300)  
-                    .ease(materialEasing)
-               // 动画性能优化  
-                   .call(transition => {
-                         transition.on("start", () => console.time("animation"));
-                         transition.on("end", () => console.timeEnd("animation"));
-                          })
                     .attr("x", (d, i) => Math.max(0, Number(xScale(i)) || 0))
                     .attr("width", bandwidth),
                 
@@ -301,7 +295,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验13次，当前尺寸:", { 
+                console.log("试验14次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
