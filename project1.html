@@ -115,7 +115,13 @@
             // 更新视图
             svg.attr("viewBox", `0 0 ${width} ${height}`)
                .attr("width", width)
-               .attr("height", height);
+               .attr("height", height)
+            // SVG容器添加ARIA属性
+               .attr("role", "img")
+               .attr("aria-label", "Interactive bar chart showing data values")
+            // 坐标轴添加描述
+               .append("desc")
+               .text("X axis represents data index, Y axis shows numerical values");
          
            // 应用动态配置
            svg.selectAll("text").style("font-size", `${layoutConfig.fontSize}px`);
@@ -174,6 +180,11 @@
                     })
                     .attr("width", bandwidth)
                     .attr("height", 0) // 初始高度0
+               // 柱子添加语义化标签
+                    .attr("role", "img")
+                    .attr("aria-label", d => `Data point value: ${d}`)
+               // 支持键盘导航     
+                    .attr("tabindex", 0) 
                     .transition()
                     .duration(500)
                     .ease(d3.easeCubicInOut)
