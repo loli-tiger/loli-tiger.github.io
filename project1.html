@@ -124,6 +124,14 @@
             bars.join(
                 enter => enter.append("rect")
                     .attr("fill", "steelblue")
+             // ↓↓↓ 在此处插入事件监听 ↓↓↓
+            .on("mouseover", function() {
+            d3.select(this).attr("fill", "orange");
+             })
+            .on("mouseout", function() {
+            d3.select(this).attr("fill", "steelblue");
+             })
+             // ↑↑↑ 事件监听结束 ↑↑↑
                     .attr("x", (d, i) => {
                         const xVal = Number(xScale(i)) || 0;
                         return Math.max(0, xVal);
