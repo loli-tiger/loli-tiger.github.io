@@ -83,7 +83,7 @@
                 const maxValue = d3.max(data) || 1;
                 yScale = d3.scaleLinear()
                     .domain([0, maxValue])
-                    .range([Math.max(margin.top, height - margin.bottom), margin.top + 10]);
+                    .range([Math.max(margin.top, height - margin.bottom - 10), margin.top + 10]);
             } catch (e) {
                 console.error("比例尺初始化失败:", e);
                 return;
@@ -173,7 +173,7 @@
                 if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
                     svg.append("g")
                         .attr("class", "x-axis")
-                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
+                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom - 10, currentHeight - 10)})`)
                         .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
                 }
 
@@ -203,7 +203,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验7次，当前尺寸:", { 
+                console.log("试验8次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
