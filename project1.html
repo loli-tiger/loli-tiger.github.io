@@ -173,7 +173,8 @@
                 if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
                     svg.append("g")
                         .attr("class", "x-axis")
-                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
+                       //此处修改
+                        .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
                         .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
                 }
 
