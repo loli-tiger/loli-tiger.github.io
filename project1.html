@@ -152,6 +152,13 @@
             // 处理矩形元素
             const bars = svg.selectAll("rect")
                 .data(data, (d, i) => i);
+           
+           // 使用Material Design标准缓动曲线
+           const materialEasing = d3.easeCubicBezier(0.4, 0.0, 0.2, 1);
+           // 应用动态颜色
+           const textColor = getAccessibleColor("#f0f0f0");
+             svg.selectAll("text")
+                .style("fill", textColor);
 
             bars.join(
                 enter => enter.append("rect")
@@ -186,8 +193,9 @@
                // 支持键盘导航     
                     .attr("tabindex", 0) 
                     .transition()
-                    .duration(500)
-                    .ease(d3.easeCubicInOut)
+               // MD推荐时长范围(200-500ms)
+                    .duration(300)  
+                    .ease(materialEasing)
                     .attr("height", d => {
                         const heightVal = Number(yScale(0) - yScale(d)) || 0;
                         return Math.max(0, heightVal);
@@ -205,6 +213,21 @@
             // 安全绘制坐标轴
             drawAxis();
         }
+        // 根据断点动态计算字体
+      function getTypeScale(width) {
+      const baseSize = width < BREAKPOINTS.SMALL ? 12 : 14;
+      return {
+       axisLabel: baseSize,
+       tickText: baseSize - 2,
+       title: baseSize + 4
+  };
+}
+       // 根据背景色自动计算对比色
+      function getAccessibleColor(backgroundColor) {
+       const rgb = d3.rgb(backgroundColor);
+       const luminance = 0.2126*rgb.r + 0.7152*rgb.g + 0.0722*rgb.b;
+       return luminance > 180 ? "#2d2d2d" : "#ffffff";
+       }
 
         // 坐标轴绘制（增强保护）
         function drawAxis() {
@@ -227,6 +250,17 @@
                         .attr("transform", `translate(${layoutConfig.margin.left}, 0)`)
                         .call(d3.axisLeft(yScale));
                 }
+
+                 const typeScale = getTypeScale(currentWidth);
+  
+                svg.select(".x-axis")
+                   .selectAll("text")  
+                   .style("font-size", `${typeScale.tickText}px`)
+                   .attr("dy", "0.5em");
+
+                svg.select(".y-axis")
+                  .selectAll("text")
+                  .style("font-size", `${typeScale.tickText}px`);
             } catch (e) {
                 console.error("坐标轴绘制失败:", e);
             }
@@ -234,6 +268,15 @@
 
         // 数据定义
         const data = [4, 8, 15, 16, 23, 42];
+       // 添加RAF优化
+       let animationFrame;
+       const optimizedResizeHandler = () => {
+       cancelAnimationFrame(animationFrame);
+       animationFrame = requestAnimationFrame(() => {
+        updateSystem();
+        });
+        };
+
 
         // 安全初始化
         document.addEventListener("DOMContentLoaded", () => {
