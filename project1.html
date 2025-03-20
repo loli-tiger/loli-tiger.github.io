@@ -141,13 +141,14 @@
                         return Math.min(currentHeight - margin.bottom, yVal);
                     })
                     .attr("width", bandwidth)
+                    .attr("height", 0) // 初始高度0
+                    .transition()
+                    .duration(500)
+                    .ease(d3.easeCubicInOut)
                     .attr("height", d => {
                         const heightVal = Number(yScale(0) - yScale(d)) || 0;
                         return Math.max(0, heightVal);
-                    })
-                    .transition()
-                    .duration(500)
-                    .ease(d3.easeCubicInOut),
+                    }),
                 
                 update => update
                     .transition()
