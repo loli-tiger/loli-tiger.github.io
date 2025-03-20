@@ -173,7 +173,7 @@
                 if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
                     svg.append("g")
                         .attr("class", "x-axis")
-                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
+                        .attr("transform", `translate(0, ${yScale(Math.min(currentHeight - margin.bottom, currentHeight - 10))})`)
                         .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
                 }
 
@@ -203,7 +203,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验2次，当前尺寸:", { 
+                console.log("试验3次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
