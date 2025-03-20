@@ -20,18 +20,24 @@
 
     <script type="text/javascript">
 
-                  console.log("当前试验次数1，当前尺寸:", { 
-                    currentwidth: currentWidth, 
-                     currentheight: currentHeight,
-                     currentbandwidth: xScale?.bandwidth(),
-                     currentyRange: yScale?.range()
+                  console.log("当前试验次数2，当前尺寸:", { 
+                    width: currentWidth, 
+                    height: currentHeight,
+                    bandwidth: xScale?.bandwidth(),
+                   yRange: yScale?.range()
                 });
         // 初始化变量
         let svg;
         let xScale, yScale;
         let currentWidth ;
         let currentHeight;
-        
+
+                         console.log("当前试验次数1，当前尺寸:", { 
+                    currentwidth: currentWidth, 
+                     currentheight: currentHeight,
+                     currentbandwidth: xScale?.bandwidth(),
+                     currentyRange: yScale?.range()
+                });
         // 边距配置
         const margin = {
             top: 20,
