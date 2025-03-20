@@ -164,38 +164,30 @@
         }
 
         // 坐标轴绘制（增强保护）
-       function drawAxis() {
-    try {
-        // 清除旧坐标轴
-        svg.selectAll(".x-axis, .y-axis").remove();
+        function drawAxis() {
+            try {
+                // 清除旧坐标轴
+                svg.selectAll(".x-axis, .y-axis").remove();
 
-        // X轴
-        if (currentHeight > margin.bottom && currentWidth > margin.left + margin.right) {
-            const xAxis = svg.append("g")
-                .attr("class", "x-axis")
-                .attr("transform", `translate(${margin.left}, ${currentHeight - margin.bottom})`)
-                .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
+                // X轴
+                if (currentHeight > margin.bottom + 10 && currentWidth > margin.left + margin.right) {
+                    svg.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
+                        .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
+                }
 
-            // 对齐修正
-            xAxis.select(".domain")
-                .attr("transform", "translate(0.5,0.5)");
+                // Y轴
+                if (currentWidth > margin.left + 10 && currentHeight > margin.top + margin.bottom) {
+                    svg.append("g")
+                        .attr("class", "y-axis")
+                        .attr("transform", `translate(${margin.left}, 0)`)
+                        .call(d3.axisLeft(yScale));
+                }
+            } catch (e) {
+                console.error("坐标轴绘制失败:", e);
+            }
         }
-
-        // Y轴
-        if (currentWidth > margin.left && currentHeight > margin.top + margin.bottom) {
-            const yAxis = svg.append("g")
-                .attr("class", "y-axis")
-                .attr("transform", `translate(${margin.left}, 0)`)
-                .call(d3.axisLeft(yScale));
-
-            // 对齐修正
-            yAxis.select(".domain")
-                .attr("transform", "translate(0.5,0.5)");
-        }
-    } catch (e) {
-        console.error("坐标轴绘制失败:", e);
-    }
-}
 
         // 数据定义
         const data = [4, 8, 15, 16, 23, 42];
@@ -211,7 +203,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验1次，当前尺寸:", { 
+                console.log("试验2次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
