@@ -174,7 +174,7 @@
                     svg.append("g")
                         .attr("class", "x-axis")
                        //此处修改
-                        .attr("transform", `translate(0, ${currentHeight - margin.bottom})`)
+                        .attr("transform", `translate(0, ${Math.min(currentHeight - margin.bottom, currentHeight - 10)})`)
                         .call(d3.axisBottom(xScale).tickFormat((d, i) => data[i]));
                 }
 
