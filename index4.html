@@ -20,7 +20,7 @@
 
     <script type="text/javascript">
 
-       console.log("当前试验次数6");
+       console.log("当前试验次数7");
 
         // 初始化变量
         let svg;
@@ -214,6 +214,7 @@
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
+                    xRange: xScale?.range(),
                     yRange: yScale?.range()
                 });
             }, 200);
