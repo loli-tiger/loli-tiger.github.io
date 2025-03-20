@@ -196,11 +196,6 @@
                // MD推荐时长范围(200-500ms)
                     .duration(300)  
                     .ease(materialEasing)
-               // 动画性能优化  
-                   .call(transition => {
-                         transition.on("start", () => console.time("animation"));
-                         transition.on("end", () => console.timeEnd("animation"));
-                          })
                     .attr("height", d => {
                         const heightVal = Number(yScale(0) - yScale(d)) || 0;
                         return Math.max(0, heightVal);
@@ -295,7 +290,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 updateSystem();
-                console.log("试验14次，当前尺寸:", { 
+                console.log("试验15次，当前尺寸:", { 
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
