@@ -55,16 +55,18 @@
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
+                    xRange: xScale?.range(),
                     yRange: yScale?.range()
                 });
             
-            updateSystem(); // 强制首次更新
+            updateSystem(true); // 强制首次更新
 
                         console.log("当前尺寸:", { 
                    container: container,
                     width: currentWidth, 
                     height: currentHeight,
                     bandwidth: xScale?.bandwidth(),
+                    xRange: xScale?.range(),
                     yRange: yScale?.range()
                 });
         }
