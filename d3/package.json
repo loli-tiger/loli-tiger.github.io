@@ -1,0 +1,14 @@
+{
+  "name": "4c709516927ce622",
+  "main": "4c709516927ce622@100.js",
+  "version": "100.0.0",
+  "homepage": "https://observablehq.com/d/4c709516927ce622",
+  "author": {
+    "name": "follow17",
+    "url": "https://observablehq.com/@follow17"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
