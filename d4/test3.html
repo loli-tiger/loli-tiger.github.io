@@ -3,57 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>股票接口测试</title>
+    <title>股票数据测试</title>
 </head>
 <body>
-    <h1>股票接口测试</h1>
-    <button id="testButton">测试接口</button>
+    <h1>股票数据测试</h1>
+    <button id="testButton">测试数据处理</button>
     <div id="result"></div>
 
     <script>
+        // 模拟的股票映射表
+        const stockMapData = [
+            {dm: "688981", mc: "股票A"},
+            {dm: "301291", mc: "股票B"},
+            {dm: "688508", mc: "股票C"},
+            {dm: "001308", mc: "股票D"},
+            {dm: "300433", mc: "股票E"},
+            {dm: "300001", mc: "股票F"},
+            {dm: "600887", mc: "股票G"}
+        ];
+
+        // 模拟的data数据集
+        const data = [
+            {date: "2025-03-12T16:00Z", name: "688981", category: "1", value: -561981557.34},
+            {date: "2025-03-12T16:00Z", name: "301291", category: "1", value: 673109},
+            {date: "2025-03-12T16:00Z", name: "688508", category: "1", value: -14724433.59},
+            {date: "2025-03-12T16:00Z", name: "001308", category: "1", value: -484523.68},
+            {date: "2025-03-12T16:00Z", name: "300433", category: "1", value: -350428093.81},
+            {date: "2025-03-12T16:00Z", name: "300001", category: "1", value: -2886978},
+            {date: "2025-03-12T16:00Z", name: "600887", category: "1", value: 16325724.7},
+            {date: "2025-03-13T16:00Z", name: "688981", category: "1", value: 263988265.68},
+            {date: "2025-03-13T16:00Z", name: "301291", category: "1", value: 4906459},
+            {date: "2025-03-13T16:00Z", name: "688508", category: "1", value: 6902454.53},
+            {date: "2025-03-13T16:00Z", name: "001308", category: "1", value: 1092680},
+            {date: "2025-03-13T16:00Z", name: "300433", category: "1", value: 107709080.31},
+            {date: "2025-03-13T16:00Z", name: "300001", category: "1", value: 35245189},
+            {date: "2025-03-13T16:00Z", name: "600887", category: "1", value: 894416724.04},
+            {date: "2025-03-16T16:00Z", name: "688981", category: "1", value: -32616476.8},
+            {date: "2025-03-16T16:00Z", name: "301291", category: "1", value: -29481291},
+            {date: "2025-03-16T16:00Z", name: "688508", category: "1", value: -2379556.95}
+        ];
+
         async function getStockMap() {
-            try {
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const targetUrl = 'http://api.mairui.club/hslt/list/26CCBB57-BC15-479D-8EAA-668F5E6056BA';
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // 创建代码->名称的Map
-                return new Map(data.map(item => [item.dm, item.mc]));
-            } catch (error) {
-                console.error('获取股票列表失败:', error);
-                return new Map(); // 返回空Map防止后续出错
-            }
+            // 模拟从接口获取映射表
+            return new Map(stockMapData.map(item => [item.dm, item.mc]));
         }
 
-        async function testStockAPI() {
+        async function addStockNameColumn() {
+            // 获取映射表
+            const stockMap = await getStockMap();
+            
+            // 添加新列
+            const newData = data.map(d => ({
+                ...d, // 保留原有字段
+                gupiao: stockMap.get(d.name) || '未知股票' // 添加新列
+            }));
+            
+            return newData;
+        }
+
+        async function testDataProcessing() {
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '正在连接接口...';
+            resultDiv.innerHTML = '正在处理数据...';
 
             try {
-                const stockMap = await getStockMap();
+                const enhancedData = await addStockNameColumn();
                 
-                if (stockMap.size > 0) {
-                    resultDiv.innerHTML = `
-                        <p>接口连接成功！</p>
-                        <p>获取到 ${stockMap.size} 条股票数据。</p>
-                        <p>示例数据：</p>
-                        <pre>${JSON.stringify(Array.from(stockMap.entries()).slice(0, 5), null, 2)}</pre>
-                    `;
-                } else {
-                    resultDiv.innerHTML = '<p>接口连接成功，但未获取到任何数据。</p>';
-                }
+                resultDiv.innerHTML = `
+                    <p>数据处理成功！</p>
+                    <p>共处理了 ${enhancedData.length} 条数据。</p>
+                    <p>示例数据：</p>
+                    <pre>${JSON.stringify(enhancedData.slice(0, 5), null, 2)}</pre>
+                `;
             } catch (error) {
-                resultDiv.innerHTML = `<p>接口连接失败: ${error.message}</p>`;
+                resultDiv.innerHTML = `<p>数据处理失败: ${error.message}</p>`;
             }
         }
 
-        document.getElementById('testButton').addEventListener('click', testStockAPI);
+        document.getElementById('testButton').addEventListener('click', testDataProcessing);
     </script>
 </body>
 </html>
