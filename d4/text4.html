@@ -1,0 +1,11 @@
+<div id="observablehq-chart-f601833a"></div>
+<p>Credit: <a href="https://observablehq.com/d/b14e23ab39191829@3380">Bar Chart Race by follow17</a></p>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@observablehq/inspector@5/dist/inspector.css">
+<script type="module">
+import {Runtime, Inspector} from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@5/dist/runtime.js";
+import define from "https://api.observablehq.com/d/b14e23ab39191829@3380.js?v=4";
+new Runtime().module(define, name => {
+  if (name === "chart") return new Inspector(document.querySelector("#observablehq-chart-f601833a"));
+});
+</script>
