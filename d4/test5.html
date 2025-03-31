@@ -9,18 +9,21 @@
     <span>测试3</span>
 <body>
 <script>
-const gen = myGenerator();
-console.log(gen); // 输出迭代器对象
-console.log(gen.next()); // { value: "第一次暂停", done: false }
-//console.log(gen.next()); // { value: "第二次暂停", done: false }
-//console.log(gen.next()); // { value: undefined, done: true }
+function* fibonacciGenerator() {
+  let a = 0;
+  let b = 1;
+  while (true) {
+    yield a; // 暂停并返回当前值
+    [a, b] = [b, a + b]; // 更新 a 和 b
+  }
+}
 
-function* myGenerator() {
-  console.log("开始执行");
-  yield "第一次暂停";
-  console.log("继续执行");
-  yield "第二次暂停";
-  console.log("执行结束");
+// 创建生成器实例
+const fib = fibonacciGenerator();
+
+// 获取前 10 个斐波那契数
+for (let i = 0; i < 10; i++) {
+  console.log(fib.next().value);
 }
 </script>
 </body>
