@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>股票数据测试</title>
 </head>
+    <span>测试1</span>
 <body>
 <script>
- myGenerator() ;
+const gen = myGenerator();
+console.log(gen); // 输出迭代器对象
 
 function* myGenerator() {
   console.log("开始执行");
