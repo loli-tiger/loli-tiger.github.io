@@ -25,6 +25,49 @@ const fib = fibonacciGenerator();
 for (let i = 0; i < 10; i++) {
   console.log(fib.next().value);
 }
+
+    function* fetchData() {
+  try {
+    const data = yield fetch("https://api.example.com/data");
+    console.log("数据:", data);
+  } catch (error) {
+    console.error("错误:", error);
+  }
+}
+
+// 执行生成器
+const gen = fetchData();
+gen.next(); // 开始执行
+gen.next(fetch("https://api.example.com/data")); // 模拟异步请求完成
+
+    function* rangeGenerator(start, end) {
+  for (let i = start; i <= end; i++) {
+    yield i;
+  }
+}
+
+const range = rangeGenerator(1, 5);
+console.log([...range]); // [1, 2, 3, 4, 5]
+
+    function* task1() {
+  console.log("任务1开始");
+  yield;
+  console.log("任务1继续");
+}
+
+function* task2() {
+  console.log("任务2开始");
+  yield;
+  console.log("任务2继续");
+}
+
+const t1 = task1();
+const t2 = task2();
+
+t1.next(); // 任务1开始
+t2.next(); // 任务2开始
+t1.next(); // 任务1继续
+t2.next(); // 任务2继续
 </script>
 </body>
 </html>
