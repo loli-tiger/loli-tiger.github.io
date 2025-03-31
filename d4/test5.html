@@ -5,3 +5,24 @@ function* myGenerator() {
   yield "第二次暂停";
   console.log("执行结束");
 }
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票数据测试</title>
+</head>
+<body>
+<script>
+ myGenerator() ;
+
+function* myGenerator() {
+  console.log("开始执行");
+  yield "第一次暂停";
+  console.log("继续执行");
+  yield "第二次暂停";
+  console.log("执行结束");
+}
+</script>
+</body>
+</html>
