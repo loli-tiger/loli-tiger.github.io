@@ -66,16 +66,16 @@
     </style>
 </head>
 <body>
-    你好
+    你好啊
     <span id="content"></span>
     <script>
      // 监听来自Thunkable应用的消息
         window.addEventListener('message', function(event) {
             // 检查消息内容
-            if (event.data && event.data.action === 'changeBackground') {
+            if (typeof event.data === 'string' && event.data.startsWith('rgb')) {
                 // 修改背景色
-                document.body.style.backgroundColor = event.data.color;
-            } else {
+                document.body.style.backgroundColor = event.data;
+            }else {
                 // 接收Markdown内容
                 var markdown = event.data;
                 
