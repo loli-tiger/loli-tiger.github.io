@@ -12,10 +12,10 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: white;
+            background-color: rgb(200, 194, 171);
         }
         #content {
-            background-color: white;
+            background-color: rgb(200, 194, 171);
             border-radius: 8px;
             padding: 10px;
            //box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -47,7 +47,7 @@
             font-family: monospace;
         }
         pre {
-            background-color: white;
+            background-color: rgb(200, 194, 171);
             border-radius: 6px;
             padding: 10px;
            // overflow-x: auto;
@@ -66,15 +66,11 @@
     </style>
 </head>
 <body>你好
-    <span id="content">你好啊</span>
+    <span id="content"></span>
     <script>
      // 监听来自Thunkable应用的消息
         window.addEventListener('message', function(event) {
-            // 检查消息内容
-            if (typeof event.data === 'string' && event.data.startsWith('rgb')) {
-                // 修改背景色
-              document.body.style.background-color = event.data;
-            }else {
+    
                 // 接收Markdown内容
                 var markdown = event.data;
                 
@@ -83,7 +79,6 @@
                 
                 // 显示HTML内容
                 document.getElementById('content').innerHTML = html;
-            }
         });
     </script>
 </body>
