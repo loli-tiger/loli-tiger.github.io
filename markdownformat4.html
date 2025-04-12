@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超快Markdown渲染</title>
+    <!-- 预连接CDN加速 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://unpkg.com">
+    <!-- 使用更快的 markdown-it 解析器 -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: rgb(200, 194, 171);
+        }
+        #content {
+            background-color: rgb(200, 194, 171);
+            border-radius: 8px;
+            padding: 10px;
+           //box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 5px);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: rgb(200, 194, 171);
+            border-radius: 6px;
+            padding: 10px;
+           // overflow-x: auto;
+            font-family: monospace;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        strong {
+            font-weight: bold;
+        }
+        em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>你好。。。
+    <span id="content"></span>
+    <script>
+        // ================== 三级加速方案 ==================
+        // 1. 并行加载：预连接CDN + 按需加载WASM
+        // 2. 增量渲染：分块解析+流式更新
+        // 3. 内存缓存：避免重复解析相同内容
+
+        let parser;
+        const chunkSize = 2000; // 每次处理2000字符
+        const cache = new Map(); // 内容缓存
+
+        // 动态选择最快解析器（首次使用markdown-it，后台加载WASM）
+        async function initParser() {
+            // 主解析器：markdown-it（立即可用）
+            parser = window.markdownit();
+            
+            // 后台预加载WASM加速器
+            import("https://unpkg.com/pulldown-cmark-wasm@0.4.0")
+            .then(module => {
+                console.log("WASM加速器已就绪");
+                parser.wasmParser = module.pulldownCmark;
+            });
+        }
+
+        // 增量解析函数
+        function parseInChunks(text, callback) {
+            let position = 0;
+            
+            function processChunk() {
+                const chunk = text.substr(position, chunkSize);
+                position += chunkSize;
+                
+                // 使用缓存或解析
+                if(cache.has(chunk)) {
+                    callback(cache.get(chunk));
+                } else {
+                    const html = parser.render(chunk);
+                    cache.set(chunk, html);
+                    callback(html);
+                }
+                
+                if(position < text.length) {
+                    requestAnimationFrame(processChunk);
+                }
+            }
+            
+            processChunk();
+        }
+
+        // 初始化并接收消息
+        initParser().then(() => {
+            ThunkableWebviewerExtension.receiveMessage((mdContent) => {
+                const container = document.getElementById("content");
+                
+                // 清空容器但保留100个旧节点（避免重排抖动）
+                while(container.children.length > 100) {
+                    container.removeChild(container.firstChild);
+                }
+                
+                // 增量流式渲染
+                parseInChunks(mdContent, (htmlChunk) => {
+                    const fragment = document.createRange().createContextualFragment(htmlChunk);
+                    container.appendChild(fragment);
+                });
+                
+                // 如果WASM已加载，用更快的解析器重做
+                if(parser.wasmParser) {
+                    const fullHtml = parser.wasmParser.parse(mdContent);
+                    container.innerHTML = fullHtml;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
