@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实时Markdown流式渲染</title>
+    <title>实时Markdown渲染</title>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
     <style>
-        /* 精简样式 */
         #content {
             background: rgb(200, 194, 171);
-            min-height: 100vh;
             padding: 20px;
-            white-space: pre-wrap; /* 保留换行 */
+            min-height: 100vh;
+            white-space: pre-wrap; /* 关键样式：保留换行 */
         }
         #content::after {
             content: "|";
@@ -25,67 +24,70 @@
     <div id="content"></div>
 
     <script>
-        // ================= 实时流式处理核心逻辑 =================
-        let buffer = '';
-        let currentParent = document.getElementById('content');
-        const nodeStack = [currentParent];
-        let isProcessing = false;
+        // 核心渲染引擎
+        let currentLine = document.createElement('div');
+        let currentNode = currentLine;
+        document.getElementById('content').appendChild(currentLine);
 
-        // 轻量级Markdown解析器（按字符处理）
-        const mdRules = {
-            '#': 'h1', '##': 'h2', '###': 'h3',
-            '*': 'li', '-': 'li', '>': 'blockquote',
-            '`': 'code'
+        // 状态跟踪器
+        let lastChar = '';
+        let mdState = {
+            inCode: false,
+            headerLevel: 0,
+            listDepth: 0
         };
 
-        // 动态创建元素
-        function createElement(tag) {
-            const el = document.createElement(tag);
-            currentParent.appendChild(el);
-            return el;
-        }
-
-        // 实时处理每个字符
-        async function processChar(char) {
-            buffer += char;
-            
-            // 即时解析特殊符号
-            if (['\n', '#', '*', '-', '>', '`'].includes(char)) {
-                flushBuffer();
+        // 主处理函数
+        async function processCharacter(char) {
+            // 即时创建新行
+            if (lastChar === '\n' && char !== '\n') {
+                currentLine = document.createElement('div');
+                document.getElementById('content').appendChild(currentLine);
+                currentNode = currentLine;
             }
 
-            // 立即更新显示
-            if (currentParent.lastChild?.nodeType === Node.TEXT_NODE) {
-                currentParent.lastChild.textContent += char;
-            } else {
-                currentParent.appendChild(document.createTextNode(char));
+            // 即时格式检测
+            if (char === '#') {
+                const newHeader = document.createElement('h1');
+                currentLine.replaceWith(newHeader);
+                currentLine = newHeader;
+                currentNode = newHeader;
+            } else if (char === '*' || char === '-') {
+                const list = document.createElement('ul');
+                const listItem = document.createElement('li');
+                list.appendChild(listItem);
+                currentLine.replaceWith(list);
+                currentLine = listItem;
+                currentNode = listItem;
             }
+
+            // 立即更新DOM
+            const textNode = document.createTextNode(char);
+            currentNode.appendChild(textNode);
             
-            await new Promise(r => requestAnimationFrame(r));
+            // 滚动到最新内容
+            textNode.parentElement.scrollIntoView({ behavior: 'smooth' });
+            
+            // 记录最后字符
+            lastChar = char;
+            
+            // 最小延迟保证流畅度
+            await new Promise(r => setTimeout(r, 0));
         }
 
-        // 处理缓冲区
-        function flushBuffer() {
-            const match = Object.keys(mdRules).find(k => buffer.startsWith(k));
-            if (!match) return;
-
-            const tag = mdRules[match];
-            const newElement = createElement(tag);
-            newElement.textContent = buffer.slice(match.length);
-            
-            if (['h1','h2','h3','li','blockquote'].includes(tag)) {
-                nodeStack.push(newElement);
-                currentParent = newElement;
-            }
-            
-            buffer = '';
-        }
-
-        // 接收消息入口（逐字处理）
+        // 消息接收处理
         ThunkableWebviewerExtension.receiveMessage(async (chunk) => {
+            // 清空初始内容（仅首次）
+            if (lastChar === '') {
+                document.getElementById('content').innerHTML = '';
+                currentLine = document.createElement('div');
+                document.getElementById('content').appendChild(currentLine);
+                currentNode = currentLine;
+            }
+            
+            // 逐字符处理
             for (const char of chunk) {
-                await processChar(char);
-                await new Promise(r => setTimeout(r, 0)); // 让出事件循环
+                await processCharacter(char);
             }
         });
     </script>
