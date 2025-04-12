@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极速Markdown打字机</title>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: rgb(200, 194, 171);
+        }
+        #content {
+            background-color: rgb(200, 194, 171);
+            border-radius: 8px;
+            padding: 10px;
+           //box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 5px);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: rgb(200, 194, 171);
+            border-radius: 6px;
+            padding: 10px;
+           // overflow-x: auto;
+            font-family: monospace;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        strong {
+            font-weight: bold;
+        }
+        em {
+            font-style: italic;
+        }
+              /* 极简光标动画 */
+        #content::after {
+            content: "|";
+            animation: blink 1s step-end infinite;
+            opacity: 0.7;
+        }
+        @keyframes blink { 50% { opacity: 0 } }
+    </style>
+</head>
+<body>你好。。。。。
+    <span id="content"></span>
+    <script>
+        // ================= 并行处理架构 =================
+        // [Worker线程] Markdown解析 -> HTML分块
+        // [主线程]   动态构建DOM + 逐字动画
+        // ==============================================
+
+        // 配置参数
+        const CHAR_DELAY = 8,   // 字符间隔(ms)
+              CHUNK_SIZE = 50;  // 批量处理字符数
+
+        // 创建高效Worker
+        const worker = new Worker('data:text/javascript,' + encodeURIComponent(`
+            self.addEventListener('message', async (e) => {
+                // 使用性能最高的WASM解析器
+                importScripts('https://unpkg.com/pulldown-cmark-wasm@0.4.0/dist/pulldown-cmark-wasm.js');
+                const html = pulldown_cmark_wasm.parse(e.data);
+                
+                // 流式分块逻辑
+                const chunks = [];
+                let buffer = '';
+                for (const char of html) {
+                    buffer += char;
+                    if (buffer.length >= 100 || char === '>') { // 按标签或长度分块
+                        chunks.push(buffer);
+                        buffer = '';
+                    }
+                }
+                if (buffer) chunks.push(buffer);
+                
+                self.postMessage(chunks);
+            });
+        `));
+
+        // DOM构建器
+        let currentNode = document.getElementById('content');
+        const nodeStack = [currentNode];
+        
+        worker.onmessage = async (e) => {
+            const chunks = e.data;
+            for (const chunk of chunks) {
+                await renderChunk(chunk);
+            }
+        };
+
+        // 高性能分块渲染
+        async function renderChunk(htmlChunk) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlChunk;
+            
+            let walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_ALL);
+            let node;
+            
+            while ((node = walker.nextNode())) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    // 处理元素节点
+                    const newElement = node.cloneNode(false);
+                    currentNode.appendChild(newElement);
+                    
+                    if (!node.childNodes.length) continue;
+                    
+                    if (node.tagName !== 'BR') {
+                        nodeStack.push(newElement);
+                        currentNode = newElement;
+                    }
+                } else if (node.nodeType === Node.TEXT_NODE) {
+                    // 批量文字渲染
+                    await renderText(node.textContent);
+                }
+            }
+        }
+
+        // 优化后的逐字渲染（批量更新）
+        async function renderText(text) {
+            const initialLength = currentNode.textContent.length;
+            let buffer = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                buffer += text[i];
+                
+                if (i % CHUNK_SIZE === 0 || i === text.length - 1) {
+                    currentNode.textContent = currentNode.textContent.slice(0, initialLength) + buffer;
+                    await new Promise(r => setTimeout(r, CHAR_DELAY));
+                }
+            }
+        }
+
+        // 接收消息入口
+        ThunkableWebviewerExtension.receiveMessage((md) => {
+            currentNode.innerHTML = '';
+            nodeStack.length = 1;
+            worker.postMessage(md);
+        });
+    </script>
+</body>
+
+</html>
