@@ -3,174 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极速Markdown打字机</title>
+    <title>实时Markdown流式渲染</title>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
-
-
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: rgb(200, 194, 171);
-        }
+        /* 精简样式 */
         #content {
-             display: block; /* 确保div容器正常显示 */
-            background-color: rgb(200, 194, 171);
-            border-radius: 8px;
-            padding: 10px;
-           //box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-height: calc(100vh - 5px);
+            background: rgb(200, 194, 171);
+            min-height: 100vh;
+            padding: 20px;
+            white-space: pre-wrap; /* 保留换行 */
         }
-        h1, h2, h3, h4, h5, h6 {
-            color: #333;
-        }
-        p {
-            line-height: 1.6;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        ul, ol {
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        code {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-        }
-        pre {
-            background-color: rgb(200, 194, 171);
-            border-radius: 6px;
-            padding: 10px;
-           // overflow-x: auto;
-            font-family: monospace;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        strong {
-            font-weight: bold;
-        }
-        em {
-            font-style: italic;
-        }
-              /* 极简光标动画 */
         #content::after {
             content: "|";
             animation: blink 1s step-end infinite;
-            opacity: 0.7;
+            color: #333;
         }
         @keyframes blink { 50% { opacity: 0 } }
     </style>
 </head>
 <body>
-    <!-- 修改容器为div -->
-    <div id="content">你好。。。。。。</div>
+    <div id="content"></div>
 
     <script>
-        // ================= 修复版核心逻辑 =================
-        const CHAR_DELAY = 8, CHUNK_SIZE = 50;
+        // ================= 实时流式处理核心逻辑 =================
+        let buffer = '';
+        let currentParent = document.getElementById('content');
+        const nodeStack = [currentParent];
+        let isProcessing = false;
 
-        // 修复1：使用更可靠的HTML分块策略
-        const worker = new Worker('data:text/javascript,' + encodeURIComponent(`
-            self.addEventListener('message', (e) => {
-                importScripts('https://unpkg.com/pulldown-cmark-wasm@0.4.0/dist/pulldown-cmark-wasm.js');
-                const html = pulldown_cmark_wasm.parse(e.data);
-                
-                // 改进分块逻辑：确保标签完整性
-                const chunks = [];
-                let buffer = '';
-                let inTag = false;
-                
-                for (const char of html) {
-                    buffer += char;
-                    if (char === '<') inTag = true;
-                    if (char === '>') inTag = false;
-                    
-                    // 分块条件：非标签内容达到CHUNK_SIZE或标签结束
-                    if (!inTag && buffer.length >= 100 || char === '>') {
-                        chunks.push(buffer);
-                        buffer = '';
-                    }
-                }
-                if (buffer) chunks.push(buffer);
-                self.postMessage(chunks);
-            });
-        `));
-
-        // 修复2：增强DOM构建器
-        let currentNode = document.getElementById('content');
-        const nodeStack = [currentNode];
-        
-        worker.onmessage = async (e) => {
-            currentNode.innerHTML = ''; // 清空初始文本
-            for (const chunk of e.data) {
-                await renderChunk(chunk);
-            }
+        // 轻量级Markdown解析器（按字符处理）
+        const mdRules = {
+            '#': 'h1', '##': 'h2', '###': 'h3',
+            '*': 'li', '-': 'li', '>': 'blockquote',
+            '`': 'code'
         };
 
-        async function renderChunk(htmlChunk) {
-            // 使用DocumentFragment避免临时div
-            const fragment = document.createRange().createContextualFragment(htmlChunk);
-            const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ALL);
+        // 动态创建元素
+        function createElement(tag) {
+            const el = document.createElement(tag);
+            currentParent.appendChild(el);
+            return el;
+        }
+
+        // 实时处理每个字符
+        async function processChar(char) {
+            buffer += char;
             
-            let node;
-            while ((node = walker.nextNode())) {
-                await processNode(node);
+            // 即时解析特殊符号
+            if (['\n', '#', '*', '-', '>', '`'].includes(char)) {
+                flushBuffer();
             }
-        }
 
-        async function processNode(node) {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                const newElement = node.cloneNode(false);
-                currentNode.appendChild(newElement);
-                
-                // 修复3：正确处理嵌套结构
-                if (node.childNodes.length > 0 && !isVoidElement(node)) {
-                    nodeStack.push(newElement);
-                    currentNode = newElement;
-                }
-            } else if (node.nodeType === Node.TEXT_NODE) {
-                await renderText(node.textContent);
+            // 立即更新显示
+            if (currentParent.lastChild?.nodeType === Node.TEXT_NODE) {
+                currentParent.lastChild.textContent += char;
+            } else {
+                currentParent.appendChild(document.createTextNode(char));
             }
+            
+            await new Promise(r => requestAnimationFrame(r));
         }
 
-        // 修复4：添加空元素检测
-        function isVoidElement(node) {
-            const voidTags = ['BR','HR','IMG','INPUT','META','LINK'];
-            return voidTags.includes(node.tagName);
-        }
+        // 处理缓冲区
+        function flushBuffer() {
+            const match = Object.keys(mdRules).find(k => buffer.startsWith(k));
+            if (!match) return;
 
-        // 修复5：优化文本渲染逻辑
-        async function renderText(text) {
-            let buffer = '';
-            for (let i = 0; i < text.length; i++) {
-                buffer += text[i];
-                if (i % CHUNK_SIZE === 0 || i === text.length - 1) {
-                    currentNode.textContent += buffer;
-                    buffer = '';
-                    await new Promise(r => setTimeout(r, CHAR_DELAY));
-                }
+            const tag = mdRules[match];
+            const newElement = createElement(tag);
+            newElement.textContent = buffer.slice(match.length);
+            
+            if (['h1','h2','h3','li','blockquote'].includes(tag)) {
+                nodeStack.push(newElement);
+                currentParent = newElement;
             }
+            
+            buffer = '';
         }
 
-        // 初始化
-        ThunkableWebviewerExtension.receiveMessage((md) => {
-            nodeStack.splice(1); // 保留根节点
-            currentNode = nodeStack[0];
-            worker.postMessage(md);
+        // 接收消息入口（逐字处理）
+        ThunkableWebviewerExtension.receiveMessage(async (chunk) => {
+            for (const char of chunk) {
+                await processChar(char);
+                await new Promise(r => setTimeout(r, 0)); // 让出事件循环
+            }
         });
     </script>
 </body>
-
 </html>
