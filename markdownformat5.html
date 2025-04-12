@@ -6,6 +6,7 @@
     <title>极速Markdown打字机</title>
     <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js"></script>
 
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,6 +15,7 @@
             background-color: rgb(200, 194, 171);
         }
         #content {
+             display: block; /* 确保div容器正常显示 */
             background-color: rgb(200, 194, 171);
             border-radius: 8px;
             padding: 10px;
@@ -71,98 +73,101 @@
         @keyframes blink { 50% { opacity: 0 } }
     </style>
 </head>
-<body>你好。。。。。
-    <span id="content"></span>
+<body>
+    <!-- 修改容器为div -->
+    <div id="content">你好。。。。。。</div>
+
     <script>
-        // ================= 并行处理架构 =================
-        // [Worker线程] Markdown解析 -> HTML分块
-        // [主线程]   动态构建DOM + 逐字动画
-        // ==============================================
+        // ================= 修复版核心逻辑 =================
+        const CHAR_DELAY = 8, CHUNK_SIZE = 50;
 
-        // 配置参数
-        const CHAR_DELAY = 8,   // 字符间隔(ms)
-              CHUNK_SIZE = 50;  // 批量处理字符数
-
-        // 创建高效Worker
+        // 修复1：使用更可靠的HTML分块策略
         const worker = new Worker('data:text/javascript,' + encodeURIComponent(`
-            self.addEventListener('message', async (e) => {
-                // 使用性能最高的WASM解析器
+            self.addEventListener('message', (e) => {
                 importScripts('https://unpkg.com/pulldown-cmark-wasm@0.4.0/dist/pulldown-cmark-wasm.js');
                 const html = pulldown_cmark_wasm.parse(e.data);
                 
-                // 流式分块逻辑
+                // 改进分块逻辑：确保标签完整性
                 const chunks = [];
                 let buffer = '';
+                let inTag = false;
+                
                 for (const char of html) {
                     buffer += char;
-                    if (buffer.length >= 100 || char === '>') { // 按标签或长度分块
+                    if (char === '<') inTag = true;
+                    if (char === '>') inTag = false;
+                    
+                    // 分块条件：非标签内容达到CHUNK_SIZE或标签结束
+                    if (!inTag && buffer.length >= 100 || char === '>') {
                         chunks.push(buffer);
                         buffer = '';
                     }
                 }
                 if (buffer) chunks.push(buffer);
-                
                 self.postMessage(chunks);
             });
         `));
 
-        // DOM构建器
+        // 修复2：增强DOM构建器
         let currentNode = document.getElementById('content');
         const nodeStack = [currentNode];
         
         worker.onmessage = async (e) => {
-            const chunks = e.data;
-            for (const chunk of chunks) {
+            currentNode.innerHTML = ''; // 清空初始文本
+            for (const chunk of e.data) {
                 await renderChunk(chunk);
             }
         };
 
-        // 高性能分块渲染
         async function renderChunk(htmlChunk) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlChunk;
+            // 使用DocumentFragment避免临时div
+            const fragment = document.createRange().createContextualFragment(htmlChunk);
+            const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ALL);
             
-            let walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_ALL);
             let node;
-            
             while ((node = walker.nextNode())) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    // 处理元素节点
-                    const newElement = node.cloneNode(false);
-                    currentNode.appendChild(newElement);
-                    
-                    if (!node.childNodes.length) continue;
-                    
-                    if (node.tagName !== 'BR') {
-                        nodeStack.push(newElement);
-                        currentNode = newElement;
-                    }
-                } else if (node.nodeType === Node.TEXT_NODE) {
-                    // 批量文字渲染
-                    await renderText(node.textContent);
-                }
+                await processNode(node);
             }
         }
 
-        // 优化后的逐字渲染（批量更新）
+        async function processNode(node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const newElement = node.cloneNode(false);
+                currentNode.appendChild(newElement);
+                
+                // 修复3：正确处理嵌套结构
+                if (node.childNodes.length > 0 && !isVoidElement(node)) {
+                    nodeStack.push(newElement);
+                    currentNode = newElement;
+                }
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                await renderText(node.textContent);
+            }
+        }
+
+        // 修复4：添加空元素检测
+        function isVoidElement(node) {
+            const voidTags = ['BR','HR','IMG','INPUT','META','LINK'];
+            return voidTags.includes(node.tagName);
+        }
+
+        // 修复5：优化文本渲染逻辑
         async function renderText(text) {
-            const initialLength = currentNode.textContent.length;
             let buffer = '';
-            
             for (let i = 0; i < text.length; i++) {
                 buffer += text[i];
-                
                 if (i % CHUNK_SIZE === 0 || i === text.length - 1) {
-                    currentNode.textContent = currentNode.textContent.slice(0, initialLength) + buffer;
+                    currentNode.textContent += buffer;
+                    buffer = '';
                     await new Promise(r => setTimeout(r, CHAR_DELAY));
                 }
             }
         }
 
-        // 接收消息入口
+        // 初始化
         ThunkableWebviewerExtension.receiveMessage((md) => {
-            currentNode.innerHTML = '';
-            nodeStack.length = 1;
+            nodeStack.splice(1); // 保留根节点
+            currentNode = nodeStack[0];
             worker.postMessage(md);
         });
     </script>
