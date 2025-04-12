@@ -78,7 +78,7 @@
         // 3. 内存缓存：避免重复解析相同内容
 
         let parser;
-        const chunkSize = 5; // 每次处理2000字符
+        const chunkSize = 2000; // 每次处理2000字符
         const cache = new Map(); // 内容缓存
 
         // 动态选择最快解析器（首次使用markdown-it，后台加载WASM）
