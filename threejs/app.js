@@ -6,7 +6,7 @@ export default function initApp(THREE) {
     const w = window.innerWidth
     const h = window.innerHeight
     
-    const scene = new THREE.Scene(1,1,1);
+    const scene = new THREE.Scene()
 
     const geometry2 = new THREE.BoxGeometry()
     const material2 = new THREE.MeshBasicMaterial()
