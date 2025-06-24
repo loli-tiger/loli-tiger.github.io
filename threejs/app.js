@@ -3,21 +3,30 @@ export default function initApp(THREE) {
     console.log("THREE in app:", THREE);
     
     // 创建场景
-    const scene = new THREE.Scene();
-    const cube
+    const w = window.innerWidth
+    const h = window.innerHeight
+    
+    const scene = new THREE.Scene(1,1,1);
+
+    const geometry2 = new THREE.BoxGeometry()
+    const material2 = new THREE.MeshBasicMaterial()
+    const cube = new THREE.Mesh(geometry2, material2)
     scene.add(cube)
+    
     const light = new THREE.AmbientLight()
     scene.add(light)
     
 
     const camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 100);
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('myCanvas') });
+    renderer.setSize = (w,h)
+    renderer.render(scene,camera)
     
     // 添加立方体
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube2 = new THREE.Mesh(geometry, material);
-    scene.add(cube2);
+    const geometry1 = new THREE.BoxGeometry();
+    const material1 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube1 = new THREE.Mesh(geometry1, material1);
+    scene.add(cube1);
     
     camera.position.z = 5;
     
