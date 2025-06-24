@@ -21,9 +21,12 @@ export default function initApp(THREE) {
     camera.position.set(0,0,5)
     camera.lookAt(0,0,0)
     
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('myCanvas') });
+  //  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('myCanvas') });
+    const renderer = new THREE.WebGLRenderer()
     renderer.setSize = (w,h)
     renderer.render(scene,camera)
+
+    document.body.append(renderer.domElement)
     
     // 添加立方体
  /*   const geometry1 = new THREE.BoxGeometry();
