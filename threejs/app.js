@@ -18,12 +18,15 @@ export default function initApp(THREE) {
     
 
     const camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 100);
+    camera.position.set(0,0,5)
+    camera.lookAt(0,0,0)
+    
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('myCanvas') });
     renderer.setSize = (w,h)
     renderer.render(scene,camera)
     
     // 添加立方体
-    const geometry1 = new THREE.BoxGeometry();
+ /*   const geometry1 = new THREE.BoxGeometry();
     const material1 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const cube1 = new THREE.Mesh(geometry1, material1);
     scene.add(cube1);
@@ -37,5 +40,5 @@ export default function initApp(THREE) {
         cube.rotation.y += 0.01;
         renderer.render(scene, camera);
     }
-    animate();
+    animate();*/
 }
