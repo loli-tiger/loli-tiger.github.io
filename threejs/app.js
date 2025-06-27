@@ -39,8 +39,12 @@ export default function initApp(THREE) {
         },1000 / 60
         )*/
     //requestAnimationFrame动画方法
+    let time = Date.now()
     function tick(){
-        cube.rotation.z += 0.01
+        let currentTime = Date.now()
+        let deltaTime = currentTime - time
+        time = currentTime
+        cube.rotation.z += deltaTime
         renderer.render(scene,camera)
         requestAnimationFrame(tick)
     }
