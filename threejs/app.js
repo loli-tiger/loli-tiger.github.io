@@ -18,9 +18,10 @@ export default function initApp(THREE) {
     //位置
     cube.position.set(1, 1, 1)
     //旋转
-    cube.rotation.x = 45 / 180 * Math.PI
-    cube.rotation.y = 45 / 180 * Math.PI
+    //cube.rotation.x = 45 / 180 * Math.PI
+    //cube.rotation.y = 45 / 180 * Math.PI
     //缩放
+    cube.scale.set(2, 2, 2)
     //创建灯光
     const light = new THREE.AmbientLight()
     scene.add(light)
