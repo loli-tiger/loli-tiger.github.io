@@ -1,5 +1,5 @@
 // 导出初始化函数
-export default function initApp(THREE) {
+export default function initApp(THREE, OrbitControls) {
     console.log("THREE in app:", THREE);
     
     // 创建场景
