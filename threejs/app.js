@@ -8,6 +8,9 @@ export default function initApp(THREE) {
     
     const scene = new THREE.Scene()
 
+    const axes = new THREE.AxesHelper(2, 2, 2)
+    scene.add(axes)
+
     const geometry = new THREE.BoxGeometry()
     const material = new THREE.MeshBasicMaterial()
     const cube = new THREE.Mesh(geometry, material)
