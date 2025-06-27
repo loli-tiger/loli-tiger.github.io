@@ -20,7 +20,7 @@ export default function initApp(THREE) {
     scene.add(light)
     
     const camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 100);
-    camera.position.set(0,0,5)
+    camera.position.set(5, 5, 5)
     camera.lookAt(0,0,0)
     
     const renderer = new THREE.WebGLRenderer()
