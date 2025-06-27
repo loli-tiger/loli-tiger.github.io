@@ -32,7 +32,12 @@ export default function initApp(THREE) {
     //创建渲染器
     const renderer = new THREE.WebGLRenderer()
     renderer.setSize(w,h)
-    renderer.render(scene,camera)
+    //设置运动时间间隔
+    setInterval(() => {
+        cube.rotation.z += 0.01
+        renderer.render(scene,camera)
+        },1000 / 60
+        )
 
     document.body.append(renderer.domElement)
 }
