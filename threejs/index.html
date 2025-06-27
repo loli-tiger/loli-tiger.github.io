@@ -3,6 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <title>Three.js Demo</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; /* 防止滚动条 */
+        }
+    </style>
 </head>
 <body>
 
@@ -17,7 +23,7 @@
         import initApp from './app.js';
         
         // 启动应用
-        initApp(THREE);
+        initApp(THREE, OrbitControls);
     </script>
 </body>
 </html>
