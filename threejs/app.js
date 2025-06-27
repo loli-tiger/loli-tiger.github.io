@@ -1,5 +1,5 @@
 // 导出初始化函数
-export default function initApp(THREE, OrbitControls) {
+export default function initApp(THREE) {
     console.log("THREE in app:", THREE);
     
     // 创建场景
@@ -37,15 +37,9 @@ export default function initApp(THREE, OrbitControls) {
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
         alpha: true // 允许透明背景 })
-    renderer.setSize(w,h)
+    renderer.setSize(w,h);
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
-    // 添加轨道控制器 - 使用传入的OrbitControls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // 启用阻尼效果
-    controls.dampingFactor = 0.05;
-    controls.update();
-
         // 添加窗口大小变化监听
     window.addEventListener('resize', () => {
         const newWidth = window.innerWidth;
