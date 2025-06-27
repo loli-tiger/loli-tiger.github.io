@@ -33,11 +33,18 @@ export default function initApp(THREE) {
     const renderer = new THREE.WebGLRenderer()
     renderer.setSize(w,h)
     //设置运动时间间隔
-    setInterval(() => {
+    /*setInterval(() => {
         cube.rotation.z += 0.01
         renderer.render(scene,camera)
         },1000 / 60
-        )
+        )*/
+    //requestAnimationFrame动画方法
+    function tick(){
+        cube.rotation.z += 0.01
+        renderer.render(scene,camera)
+        requestAnimationFrame(tick)
+    }
+    tick()
 
     document.body.append(renderer.domElement)
 }
