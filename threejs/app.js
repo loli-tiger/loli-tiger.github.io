@@ -33,7 +33,7 @@ export default function initApp(THREE) {
     camera.position.set(5, 5, 5)
     camera.lookAt(0,0,0)
     // 创建渲染器
-    const renderer = new THREE.WebGLRenderer()
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(w,h)
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
     // 添加轨道控制器
