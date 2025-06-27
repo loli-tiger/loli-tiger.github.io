@@ -32,14 +32,14 @@ export default function initApp(THREE) {
     //创建渲染器
     const renderer = new THREE.WebGLRenderer()
     renderer.setSize(w,h)
-    //设置运动时间间隔
+    //通过设置运动时间间隔的方法实现运动
     /*setInterval(() => {
         cube.rotation.z += 0.01
         renderer.render(scene,camera)
         },1000 / 60
         )*/
-    //requestAnimationFrame动画方法
-    let time = Date.now()
+    //通过requestAnimationFrame方法实现运动/解决不同刷新率的问题
+    /*let time = Date.now()
     function tick(){
         let currentTime = Date.now()
         let deltaTime = currentTime - time
@@ -47,8 +47,18 @@ export default function initApp(THREE) {
         cube.rotation.z += deltaTime
         renderer.render(scene,camera)
         requestAnimationFrame(tick)
-    }
+    }*/
     tick()
+    //通过THREEJS自带的Clock类的方法实现运动
+    const clock = new THREE.Clock
+    tick() {
+        const time = clock.getElapsedTime()
+        //cube.rotation.z = time
+        cube.position.x = Math.sin(time * 0.1) * 2
+        cube.position.y = Math.cos(time * 0.1）* 2
 
+        renderer.render(scene,camera)
+        requestAnimationFrame(tick)
+    }
     document.body.append(renderer.domElement)
 }
