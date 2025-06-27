@@ -51,7 +51,7 @@ export default function initApp(THREE) {
     tick()
     //通过THREEJS自带的Clock类的方法实现运动
     const clock = new THREE.Clock
-    tick() {
+    function tick() {
         const time = clock.getElapsedTime()
         //cube.rotation.z = time
         cube.position.x = Math.sin(time * 0.1) * 2
