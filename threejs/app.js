@@ -23,7 +23,7 @@ export default function initApp(THREE) {
     
   //  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('myCanvas') });
     const renderer = new THREE.WebGLRenderer()
-    renderer.setSize = (w,h)
+    renderer.setSize(w,h)
     renderer.render(scene,camera)
 
     document.body.append(renderer.domElement)
