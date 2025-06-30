@@ -1,5 +1,5 @@
 // 导出初始化函数
-export default function initApp(THREE) {
+export default function initApp(THREE, Stats) {
     console.log("THREE in app:", THREE);
     
     // 创建场景
@@ -68,7 +68,7 @@ export default function initApp(THREE) {
         requestAnimationFrame(tick)
     }*/
 
-        // ===== 添加FPS计数器 =====
+    // ===== 添加FPS计数器 =====
     const stats = new Stats()
     stats.showPanel(0) // 0: fps, 1: ms, 2: mb
     document.getElementById('stats-container').appendChild(stats.dom)
