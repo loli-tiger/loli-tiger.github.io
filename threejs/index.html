@@ -20,8 +20,8 @@
 <body>
         <!-- FPS计数器容器 -->
     <div id="stats-container"></div>
-        <!-- 加载Stats.js作为全局变量 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
+    <!-- 使用正确的Stats.js UMD版本 -->
+    <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
     <script type="module">
         // 导入 Three.js
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.min.js';
@@ -29,12 +29,21 @@
         // 导入应用逻辑
         import initApp from './app.js';
         
-        // 启动应用
-        initApp(THREE, Stats);
-        // 等待页面加载完成
-        window.addEventListener('load', () => {
-            initApp(THREE, Stats); // 传递全局Stats对象
-        });
+        // 确保Stats已加载
+        const statsReady = () => {
+            if (typeof Stats === 'function') {
+                initApp(THREE, Stats);
+            } else {
+                setTimeout(statsReady, 50);
+            }
+        };
+        
+        // 检查Stats是否已加载
+        if (typeof Stats === 'function') {
+            initApp(THREE, Stats);
+        } else {
+            window.addEventListener('load', statsReady);
+        }
     </script>
 </body>
 </html>
