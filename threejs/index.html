@@ -25,6 +25,8 @@
     <script type="module">
         // 导入 Three.js
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.min.js';
+        // 导入OrbitControls
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/controls/OrbitControls.js';
 
         // 导入应用逻辑
         import initApp from './app.js';
@@ -32,7 +34,7 @@
         // 确保Stats已加载
         const statsReady = () => {
             if (typeof Stats === 'function') {
-                initApp(THREE, Stats);
+                initApp(THREE, Stats, OrbitControls);
             } else {
                 setTimeout(statsReady, 50);
             }
@@ -40,7 +42,7 @@
         
         // 检查Stats是否已加载
         if (typeof Stats === 'function') {
-            initApp(THREE, Stats);
+            initApp(THREE, Stats, OrbitControls);
         } else {
             window.addEventListener('load', statsReady);
         }
