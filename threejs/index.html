@@ -3,9 +3,21 @@
 <head>
     <meta charset="utf-8" />
     <title>Three.js Demo</title>
+        <!-- 引入Stats.js用于FPS监测 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
+    <style>
+        /* 添加样式确保FPS计数器位置固定 */
+        #stats-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+    </style>
 </head>
 <body>
-
+        <!-- FPS计数器容器 -->
+    <div id="stats-container"></div>
     
     <script type="module">
         // 导入 Three.js
