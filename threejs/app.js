@@ -31,7 +31,7 @@ export default function initApp(THREE) {
     scene.add(light)
     // 创建相机
     const camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 100);
-    camera.position.set(10, 10, 10)
+    camera.position.set(5, 5, 5)
     camera.lookAt(0,0,0)
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer({ 
