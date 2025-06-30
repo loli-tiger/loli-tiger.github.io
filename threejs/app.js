@@ -1,5 +1,5 @@
 // 导出初始化函数
-export default function initApp(THREE, Stats) {
+export default function initApp(THREE, Stats, OrbitControls) {
     console.log("THREE in app:", THREE);
     
     // 创建场景
@@ -72,6 +72,15 @@ export default function initApp(THREE, Stats) {
     const stats = new Stats()
     stats.showPanel(0) // 0: fps, 1: ms, 2: mb
     document.getElementById('stats-container').appendChild(stats.dom)
+
+    // ===== 添加轨道控制器（鼠标交互）=====
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // 启用阻尼效果，使操作更平滑
+    controls.dampingFactor = 0.05; // 阻尼系数
+    controls.screenSpacePanning = false; // 定义平移方式
+    controls.minDistance = 3; // 最小缩放距离
+    controls.maxDistance = 20; // 最大缩放距离
+    controls.maxPolarAngle = Math.PI / 2; // 限制垂直旋转角度
     
     // 通过THREEJS自带的Clock类的方法实现运动
     const clock = new THREE.Clock()
@@ -84,9 +93,10 @@ export default function initApp(THREE, Stats) {
         // 旋转动画
         cube.rotation.x = time * 0.7;
         cube.rotation.y = time * 0.5;
-
-        stats.end() // 结束性能监测
+        // 更新控制器
+        controls.update();
         renderer.render(scene,camera)
+        stats.end() // 结束性能监测
         requestAnimationFrame(tick)
     }
     tick()
