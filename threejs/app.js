@@ -7,7 +7,7 @@ export default function initApp(THREE) {
     const h = window.innerHeight
     
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x333333) // 添加窗口背景色
+    //scene.background = new THREE.Color(0x333333) // 添加窗口背景色
     // 创建物体
     const axes = new THREE.AxesHelper(5)
     scene.add(axes)
@@ -41,13 +41,13 @@ export default function initApp(THREE) {
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
         // 添加窗口大小变化监听
-    window.addEventListener('resize', () => {
+    /*window.addEventListener('resize', () => {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
         camera.aspect = newWidth / newHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(newWidth, newHeight);
-    });
+    });*/
 
         // 添加调试信息
     console.log("场景对象:", scene.children);
