@@ -67,10 +67,16 @@ export default function initApp(THREE) {
         renderer.render(scene,camera)
         requestAnimationFrame(tick)
     }*/
+
+        // ===== 添加FPS计数器 =====
+    const stats = new Stats()
+    stats.showPanel(0) // 0: fps, 1: ms, 2: mb
+    document.getElementById('stats-container').appendChild(stats.dom)
     
     // 通过THREEJS自带的Clock类的方法实现运动
     const clock = new THREE.Clock()
     function tick() {
+        stats.begin() // 开始性能监测
         const time = clock.getElapsedTime()
         //cube.rotation.z = time
         cube.position.x = Math.sin(time * 2 ) * 2
@@ -79,6 +85,7 @@ export default function initApp(THREE) {
         cube.rotation.x = time * 0.7;
         cube.rotation.y = time * 0.5;
 
+        stats.end() // 结束性能监测
         renderer.render(scene,camera)
         requestAnimationFrame(tick)
     }
