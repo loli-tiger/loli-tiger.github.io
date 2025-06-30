@@ -7,7 +7,7 @@ export default function initApp(THREE) {
     const h = window.innerHeight
     
     const scene = new THREE.Scene()
-    //scene.background = new THREE.Color(0x333333) // 添加窗口背景色
+    scene.background = new THREE.Color(0x333333) // 添加窗口背景色
     // 创建物体
     const axes = new THREE.AxesHelper(5)
     scene.add(axes)
@@ -36,7 +36,8 @@ export default function initApp(THREE) {
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
-        alpha: true  })// 允许透明背景
+        alpha: true // 允许透明背景  
+            })
     renderer.setSize(w,h)
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
@@ -83,7 +84,6 @@ export default function initApp(THREE) {
         cube.rotation.y = time * 0.5;
 
         renderer.render(scene,camera)
-        controls.update()
         requestAnimationFrame(tick)
     }
     tick()
