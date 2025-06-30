@@ -36,7 +36,7 @@ export default function initApp(THREE) {
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
-        alpha: true // 允许透明背景 })
+        alpha: true  })// 允许透明背景
     renderer.setSize(w,h)
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
