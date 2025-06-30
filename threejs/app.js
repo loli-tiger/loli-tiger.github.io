@@ -13,7 +13,7 @@ export default function initApp(THREE, Stats) {
     scene.add(axes)
 
     const geometry = new THREE.BoxGeometry()
-    const material = new THREE.MeshBasicMaterial({ 
+    const material = new THREE.MeshNormalMaterial({ 
         color: 0xff0000, // 改为更醒目的红色
         wireframe: false
     })
