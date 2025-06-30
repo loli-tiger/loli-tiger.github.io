@@ -73,8 +73,8 @@ export default function initApp(THREE) {
     function tick() {
         const time = clock.getElapsedTime()
         //cube.rotation.z = time
-        cube.position.x = Math.sin(time) * 3
-        cube.position.y = Math.cos(time * 0.8 ) * 2
+        cube.position.x = Math.sin(time * 2 ) * 2
+        cube.position.y = Math.cos(time * 2 ) * 2
         // 旋转动画
         cube.rotation.x = time * 0.7;
         cube.rotation.y = time * 0.5;
