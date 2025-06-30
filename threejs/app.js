@@ -37,7 +37,7 @@ export default function initApp(THREE) {
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
         alpha: true // 允许透明背景 })
-    renderer.setSize(w,h);
+    renderer.setSize(w,h)
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
         // 添加窗口大小变化监听
