@@ -3,8 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <title>Three.js Demo</title>
-        <!-- 引入Stats.js用于FPS监测 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
     <style>
         /* 添加样式确保FPS计数器位置固定 */
         #stats-container {
@@ -22,6 +20,8 @@
     <script type="module">
         // 导入 Three.js
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.min.js';
+        // 从CDN导入Stats.js作为ES模块
+        import Stats from 'https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js';
 
         // 导入应用逻辑
         import initApp from './app.js';
