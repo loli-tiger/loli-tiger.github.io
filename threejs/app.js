@@ -41,18 +41,14 @@ export default function initApp(THREE) {
     renderer.setSize(w,h)
     document.body.appendChild(renderer.domElement) // 立即添加到DOM
    
-        // 添加窗口大小变化监听
-    /*window.addEventListener('resize', () => {
+    // 添加窗口大小变化监听
+    window.addEventListener('resize', () => {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
         camera.aspect = newWidth / newHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(newWidth, newHeight);
-    });*/
-
-        // 添加调试信息
-    console.log("场景对象:", scene.children);
-    console.log("相机位置:", camera.position);
+    })
     
     // 通过设置运动时间间隔的方法实现运动
     /*setInterval(() => {
