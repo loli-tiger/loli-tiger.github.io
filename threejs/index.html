@@ -5,46 +5,70 @@
     <title>Three.js Demo</title>
     <style>
         body { 
-        margin: 0; 
-        overflow: hidden;
+            margin: 0; 
+            overflow: hidden;
+            font-family: Arial, sans-serif; /* 添加默认字体 */
         }
-        /* 添加样式确保FPS计数器位置固定 */
         #stats-container {
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
         }
+        /* 添加加载提示样式 */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
-        <!-- FPS计数器容器 -->
+    <!-- 添加加载提示 -->
+    <div id="loading">加载中...</div>
+    <!-- FPS计数器容器 -->
     <div id="stats-container"></div>
     <!-- 使用正确的Stats.js UMD版本 -->
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
-    <script type="module">
-        // 导入 Three.js
-        import * as THREE from 'https://cdn.skypack.dev/three@0.162.0';
-        // 修复1: 使用兼容性更好的unpkg CDN导入OrbitControls
-        import { OrbitControls } from 'https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js';
 
-        // 导入应用逻辑
-        import initApp from './app.js';
-        
-        // 确保Stats已加载
-        const statsReady = () => {
-            if (typeof Stats === 'function') {
-                initApp(THREE, Stats, OrbitControls);
-            } else {
-                setTimeout(statsReady, 50);
+    <!-- 使用importmap解决裸模块说明符问题 -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.skypack.dev/three@0.162.0",
+            "three/examples/jsm/controls/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/controls/OrbitControls.js"
+        }
+    }
+    </script>
+    <script type="module">
+        // 添加加载状态管理
+        document.getElementById('loading').textContent = '加载Three.js...';
+        try {
+            // 使用importmap中的路径
+            import * as THREE from 'three';
+            import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+            
+            // 检查Stats是否加载
+            function checkStats() {
+                if (typeof Stats === 'function') {
+                    document.getElementById('loading').textContent = '初始化场景...';
+                    import('./app.js').then(module => {
+                        module.default(THREE, Stats, OrbitControls);
+                        document.getElementById('loading').style.display = 'none';
+                    });
+                } else {
+                    setTimeout(checkStats, 50);
+                }
             }
-        };
-        
-        // 检查Stats是否已加载
-        if (typeof Stats === 'function') {
-            initApp(THREE, Stats, OrbitControls);
-        } else {
-            window.addEventListener('load', statsReady);
+            
+            checkStats();
+        } catch (error) {
+            console.error("加载错误:", error);
+            document.getElementById('loading').textContent = `加载失败: ${error.message}`;
         }
     </script>
 </body>
