@@ -1,10 +1,11 @@
-// 导出初始化函数
+// 初始化函数
 function initApp(THREE, Stats, OrbitControls) {
     console.log("Three.js version:", THREE.REVISION);
     
     // 获取DOM元素
     const loadingEl = document.getElementById('loading');
     const resetBtn = document.getElementById('reset-btn');
+    const statsContainer = document.getElementById('stats-container');
     
     // 创建场景
     const w = window.innerWidth;
@@ -62,7 +63,7 @@ function initApp(THREE, Stats, OrbitControls) {
         alpha: false
     });
     renderer.setSize(w, h);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制最大像素比
     document.body.appendChild(renderer.domElement);
    
     // 窗口大小变化处理
@@ -77,9 +78,9 @@ function initApp(THREE, Stats, OrbitControls) {
     // 添加FPS计数器
     const stats = new Stats();
     stats.showPanel(0);
-    document.getElementById('stats-container').appendChild(stats.dom);
+    statsContainer.appendChild(stats.dom);
 
-    // 添加轨道控制器
+    // 添加轨道控制器 - 使用正确的实例化方式
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -96,10 +97,11 @@ function initApp(THREE, Stats, OrbitControls) {
     // 动画循环
     const clock = new THREE.Clock();
     function animate() {
+        requestAnimationFrame(animate);
+        
         stats.begin();
         
         const time = clock.getElapsedTime();
-        const delta = clock.getDelta();
         
         // 立方体动画
         cube.position.x = Math.sin(time * 1.2) * 3;
@@ -110,6 +112,7 @@ function initApp(THREE, Stats, OrbitControls) {
         // 点光源动画
         pointLight.position.x = Math.sin(time * 0.8) * 6;
         pointLight.position.z = Math.cos(time * 0.8) * 6;
+        pointLightHelper.update(); // 更新点光源辅助
         
         // 更新控制器
         controls.update();
@@ -118,7 +121,6 @@ function initApp(THREE, Stats, OrbitControls) {
         renderer.render(scene, camera);
         
         stats.end();
-        requestAnimationFrame(animate);
     }
     
     // 启动动画
