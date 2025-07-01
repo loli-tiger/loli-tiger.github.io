@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhino 模型导入 Three.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00c9ff, #92fe9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+        
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .control-panel {
+            width: 320px;
+            background: rgba(20, 30, 48, 0.85);
+            padding: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #64b5f6;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #2193b0, #6dd5ed);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(90deg, #1a7a94, #5ac3e0);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .btn-import {
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+        }
+        
+        .btn-import:hover {
+            background: linear-gradient(90deg, #7d1dcc, #3a00b8);
+        }
+        
+        .btn-reset {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+        }
+        
+        .btn-reset:hover {
+            background: linear-gradient(90deg, #e02e58, #e03b1f);
+        }
+        
+        .slider-group {
+            margin-top: 15px;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #64b5f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .model-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            color: #90a4ae;
+        }
+        
+        .info-value {
+            font-weight: 500;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .control-panel {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+        
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 30px;
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 300px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: #4CAF50;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rhino 模型导入 Three.js</h1>
+        <p class="subtitle">将 Rhino (.3dm) 模型导出为 OBJ 格式并导入到 Three.js 场景中</p>
+    </header>
+    
+    <div class="container">
+        <div id="canvas-container"></div>
+        
+        <div class="control-panel">
+            <div class="panel-section">
+                <h2 class="panel-title">模型操作</h2>
+                <div class="btn-group">
+                    <button id="importBtn" class="btn btn-import">
+                        <i>📤</i> 导入模型
+                    </button>
+                    <button id="resetBtn" class="btn btn-reset">
+                        <i>🔄</i> 重置模型
+                    </button>
+                </div>
+                
+                <div class="slider-group">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>旋转 X</span>
+                            <span id="rotationXValue">0°</span>
+                        </div>
+                        <input type="range" id="rotationX" min="0" max="360" value="0" step="1">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>旋转 Y</span>
+                            <span id="rotationYValue">0°</span>
+                        </div>
+                        <input type="range" id="rotationY" min="0" max="360" value="0" step="1">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>缩放</span>
+                            <span id="scaleValue">1.0</span>
+                        </div>
+                        <input type="range" id="scale" min="0.1" max="3" value="1" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="model-info">
+                    <div class="info-row">
+                        <span class="info-label">模型名称:</span>
+                        <span id="modelName" class="info-value">无模型</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">顶点数:</span>
+                        <span id="vertexCount" class="info-value">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">面数:</span>
+                        <span id="faceCount" class="info-value">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">材质数:</span>
+                        <span id="materialCount" class="info-value">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h2 class="panel-title">Rhino 导出指南</h2>
+                <div class="instructions">
+                    <h3>如何在 Rhino 中导出模型：</h3>
+                    <ol>
+                        <li>在 Rhino 中打开您的 .3dm 模型文件</li>
+                        <li>选择要导出的对象（或按 Ctrl+A 全选）</li>
+                        <li>选择"文件" → "导出选取的物件"</li>
+                        <li>在保存对话框中：
+                            <ul>
+                                <li>选择文件类型为"Wavefront (*.obj)"</li>
+                                <li>设置文件名并选择保存位置</li>
+                            </ul>
+                        </li>
+                        <li>在 OBJ 导出选项对话框中：
+                            <ul>
+                                <li>勾选"导出材质"</li>
+                                <li>勾选"保存贴图"（如果模型有纹理）</li>
+                                <li>将"网格选项"设为"粗糙"、"中等"或"平滑"（根据模型复杂度）</li>
+                                <li>点击"确定"导出</li>
+                            </ul>
+                        </li>
+                        <li>Rhino 将生成一个 .obj 文件和一个 .mtl 文件</li>
+                        <li>返回此页面，点击"导入模型"按钮</li>
+                        <li>选择导出的 .obj 文件导入到场景中</li>
+                    </ol>
+                    <p>注意：确保 .obj 和 .mtl 文件在同一目录下，纹理文件也在同一目录</p>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h2 class="panel-title">场景控制</h2>
+                <div class="instructions">
+                    <p>• 鼠标左键拖动: 旋转场景</p>
+                    <p>• 鼠标右键拖动: 平移场景</p>
+                    <p>• 鼠标滚轮: 缩放场景</p>
+                    <p>• 使用上方滑块调整模型属性</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading-indicator" id="loadingIndicator">
+        <h3>正在加载模型...</h3>
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+        <p id="loadingStatus">准备中...</p>
+    </div>
+    
+    <footer>
+        <p>Three.js 场景 | Rhino 模型导入解决方案 | 使用 OBJLoader 加载 OBJ 格式模型</p>
+    </footer>
+
+    <script>
+        // 主要变量
+        let scene, camera, renderer, controls;
+        let currentModel = null;
+        
+        // 初始化Three.js场景
+        function init() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            scene.fog = new THREE.Fog(0x1a1a2e, 20, 100);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(
+                60, 
+                window.innerWidth / window.innerHeight, 
+                0.1, 
+                1000
+            );
+            camera.position.set(0, 5, 15);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: false
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // 添加轨道控制
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // 添加光源
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            scene.add(directionalLight);
+            
+            const hemisphereLight = new THREE.HemisphereLight(0x80deea, 0x4db6ac, 0.3);
+            scene.add(hemisphereLight);
+            
+            // 添加网格地面
+            const gridHelper = new THREE.GridHelper(30, 30, 0x444444, 0x222222);
+            gridHelper.position.y = -1;
+            scene.add(gridHelper);
+            
+            // 添加坐标轴
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+            
+            // 添加示例模型占位符
+            addPlaceholderModel();
+            
+            // 添加事件监听器
+            setupEventListeners();
+            
+            // 开始动画循环
+            animate();
+            
+            // 窗口大小调整处理
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // 添加示例模型占位符
+        function addPlaceholderModel() {
+            const geometry = new THREE.BoxGeometry(3, 1, 2);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0x3498db,
+                transparent: true,
+                opacity: 0.5,
+                wireframe: true
+            });
+            
+            const placeholder = new THREE.Mesh(geometry, material);
+            placeholder.position.set(0, 0, 0);
+            scene.add(placeholder);
+            
+            // 添加文本提示
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 128;
+            
+            context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.font = '48px Arial';
+            context.fillStyle = '#3498db';
+            context.textAlign = 'center';
+            context.fillText('导入Rhino模型', canvas.width/2, canvas.height/2 + 15);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const planeGeometry = new THREE.PlaneGeometry(8, 2);
+            const planeMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            
+            const textPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+            textPlane.position.set(0, 3, 0);
+            scene.add(textPlane);
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 模型导入按钮
+            document.getElementById('importBtn').addEventListener('click', () => {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.obj';
+                
+                fileInput.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        loadModel(file);
+                    }
+                };
+                
+                fileInput.click();
+            });
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', resetModel);
+            
+            // 旋转和缩放滑块
+            document.getElementById('rotationX').addEventListener('input', updateModelTransform);
+            document.getElementById('rotationY').addEventListener('input', updateModelTransform);
+            document.getElementById('scale').addEventListener('input', updateModelTransform);
+        }
+        
+        // 加载模型
+        function loadModel(file) {
+            // 显示加载指示器
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const progressBar = document.getElementById('progressBar');
+            const loadingStatus = document.getElementById('loadingStatus');
+            loadingIndicator.style.display = 'block';
+            progressBar.style.width = '0%';
+            loadingStatus.textContent = '开始加载...';
+            
+            // 移除现有模型
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+            
+            // 更新模型信息显示为加载中
+            document.getElementById('modelName').textContent = '加载中...';
+            document.getElementById('vertexCount').textContent = '计算中...';
+            document.getElementById('faceCount').textContent = '计算中...';
+            document.getElementById('materialCount').textContent = '计算中...';
+            
+            // 创建加载器
+            const objLoader = new THREE.OBJLoader();
+            const mtlLoader = new THREE.MTLLoader();
+            
+            // 获取文件路径
+            const path = file.path ? 
+                file.path.substring(0, file.path.lastIndexOf('/') + 1) : 
+                '';
+            
+            const fileName = file.name;
+            const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+            const mtlPath = path + baseName + '.mtl';
+            
+            // 显示加载进度
+            const onProgress = (xhr) => {
+                if (xhr.lengthComputable) {
+                    const percent = (xhr.loaded / xhr.total) * 100;
+                    progressBar.style.width = percent + '%';
+                    loadingStatus.textContent = `加载中: ${Math.round(percent)}%`;
+                }
+            };
+            
+            // 尝试加载材质
+            mtlLoader.load(mtlPath, (materials) => {
+                materials.preload();
+                objLoader.setMaterials(materials);
+                loadingStatus.textContent = '材质加载成功，加载模型中...';
+                
+                // 加载模型
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const objData = event.target.result;
+                        const model = objLoader.parse(objData);
+                        
+                        // 处理加载完成的模型
+                        handleLoadedModel(model, file.name);
+                        loadingIndicator.style.display = 'none';
+                    } catch (error) {
+                        console.error('解析模型出错:', error);
+                        loadingStatus.textContent = '模型解析失败';
+                        setTimeout(() => {
+                            loadingIndicator.style.display = 'none';
+                        }, 3000);
+                    }
+                };
+                reader.readAsText(file);
+            }, 
+            // 材质加载进度
+            onProgress, 
+            // 材质加载错误
+            (error) => {
+                console.warn('材质加载失败，使用默认材质:', error);
+                loadingStatus.textContent = '材质加载失败，使用默认材质...';
+                
+                // 即使材质加载失败，也尝试加载模型
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const objData = event.target.result;
+                        const model = objLoader.parse(objData);
+                        
+                        // 处理加载完成的模型
+                        handleLoadedModel(model, file.name);
+                        loadingIndicator.style.display = 'none';
+                    } catch (error) {
+                        console.error('解析模型出错:', error);
+                        loadingStatus.textContent = '模型解析失败';
+                        setTimeout(() => {
+                            loadingIndicator.style.display = 'none';
+                        }, 3000);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        // 处理加载完成的模型
+        function handleLoadedModel(model, fileName) {
+            currentModel = model;
+            
+            // 调整模型位置和大小
+            centerAndScaleModel(currentModel);
+            
+            // 添加到场景
+            scene.add(currentModel);
+            
+            // 更新模型信息
+            updateModelInfo(currentModel, fileName);
+            
+            // 更新滑块初始值
+            document.getElementById('rotationX').value = 0;
+            document.getElementById('rotationY').value = 0;
+            document.getElementById('scale').value = 1;
+            updateSliderValues();
+        }
+        
+        // 调整模型位置和大小
+        function centerAndScaleModel(model) {
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3()).length();
+            
+            // 计算缩放比例
+            const targetSize = 10;
+            const scale = targetSize / size;
+            
+            // 应用变换
+            model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+            model.scale.set(scale, scale, scale);
+            
+            // 调整位置使其位于地面上方
+            const groundY = -1;
+            const minY = box.min.y * scale - center.y * scale;
+            if (minY < groundY) {
+                model.position.y += groundY - minY;
+            }
+        }
+        
+        // 更新模型信息显示
+        function updateModelInfo(model, fileName) {
+            document.getElementById('modelName').textContent = fileName;
+            
+            // 计算顶点和面数
+            let vertexCount = 0;
+            let faceCount = 0;
+            let materialCount = 0;
+            
+            model.traverse(child => {
+                if (child.isMesh) {
+                    const geometry = child.geometry;
+                    
+                    if (geometry.isBufferGeometry) {
+                        if (geometry.index) {
+                            vertexCount += geometry.index.count;
+                            faceCount += geometry.index.count / 3;
+                        } else {
+                            vertexCount += geometry.attributes.position.count;
+                            faceCount += geometry.attributes.position.count / 3;
+                        }
+                    }
+                    
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            materialCount += child.material.length;
+                        } else {
+                            materialCount++;
+                        }
+                    }
+                }
+            });
+            
+            document.getElementById('vertexCount').textContent = vertexCount.toLocaleString();
+            document.getElementById('faceCount').textContent = faceCount.toLocaleString();
+            document.getElementById('materialCount').textContent = materialCount.toLocaleString();
+        }
+        
+        // 更新模型变换
+        function updateModelTransform() {
+            if (!currentModel) return;
+            
+            const rotationX = THREE.MathUtils.degToRad(parseInt(document.getElementById('rotationX').value));
+            const rotationY = THREE.MathUtils.degToRad(parseInt(document.getElementById('rotationY').value));
+            const scale = parseFloat(document.getElementById('scale').value);
+            
+            currentModel.rotation.x = rotationX;
+            currentModel.rotation.y = rotationY;
+            currentModel.scale.set(scale, scale, scale);
+            
+            updateSliderValues();
+        }
+        
+        // 更新滑块显示值
+        function updateSliderValues() {
+            document.getElementById('rotationXValue').textContent = 
+                parseInt(document.getElementById('rotationX').value) + '°';
+                
+            document.getElementById('rotationYValue').textContent = 
+                parseInt(document.getElementById('rotationY').value) + '°';
+                
+            document.getElementById('scaleValue').textContent = 
+                parseFloat(document.getElementById('scale').value).toFixed(1);
+        }
+        
+        // 重置模型
+        function resetModel() {
+            if (!currentModel) return;
+            
+            document.getElementById('rotationX').value = 0;
+            document.getElementById('rotationY').value = 0;
+            document.getElementById('scale').value = 1;
+            
+            updateModelTransform();
+        }
+        
+        // 窗口大小调整处理
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // 初始化场景
+        init();
+    </script>
+</body>
+</html>
