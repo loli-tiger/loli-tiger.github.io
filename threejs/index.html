@@ -25,8 +25,8 @@
     <script type="module">
         // 导入 Three.js
         import * as THREE from 'https://cdn.skypack.dev/three@0.162.0';
-        // 导入OrbitControls
-        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.162.0/examples/jsm/controls/OrbitControls.js';
+        // 修复1: 使用兼容性更好的unpkg CDN导入OrbitControls
+        import { OrbitControls } from 'https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js';
 
         // 导入应用逻辑
         import initApp from './app.js';
