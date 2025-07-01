@@ -98,15 +98,8 @@ function initApp(THREE, Stats, OrbitControls) {
     // 6. 添加外部模型加载功能
     statusText.textContent = "加载外部模型...";
     
-    // 确保OBJLoader可用
-    if (typeof THREE.OBJLoader === 'undefined') {
-        showError("OBJLoader未加载，请检查依赖");
-        statusText.textContent = "OBJLoader未加载";
-        return;
-    }
-    
     try {
-        // 创建OBJ加载器
+        // 创建OBJ加载器 - 现在应该已可用
         const loader = new THREE.OBJLoader();
         
         // 使用一个可靠的模型URL
