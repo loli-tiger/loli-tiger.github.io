@@ -97,6 +97,9 @@ function initApp(THREE, Stats, OrbitControls) {
     
     // 6. 添加外部模型加载功能
     statusText.textContent = "加载外部模型...";
+
+    // 声明变量存储加载的模型对象
+    let externalModel = null;
     
     try {
         // 创建OBJ加载器 - 现在应该已可用
@@ -210,11 +213,13 @@ function initApp(THREE, Stats, OrbitControls) {
 
             
             
-            // 外部导入模型动画 - 修复后的代码
             if (externalModel) {
+                 // 添加更多动画效果
                 externalModel.rotation.x = time * 0.6;
                 externalModel.rotation.y = time * 0.4;
-                externalModel.position.x = -3 + Math.cos(time * 0.8) * 3;
+                externalModel.rotation.z = time * 0.3;
+                externalModel.position.x = Math.sin(time * 0.8) * 3;
+                externalModel.position.y = Math.cos(time * 1.2) * 0.5;
             }
             
             controls.update();
