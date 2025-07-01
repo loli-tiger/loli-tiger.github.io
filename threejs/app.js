@@ -127,8 +127,8 @@ function initApp(THREE, Stats, OrbitControls) {
                 });
                 
                 // 调整模型位置和大小
-                object.position.set(0, 0, 5);
-                object.scale.set(0.8, 0.8, 0.8);
+                object.position.set(0, 0, 1);
+                object.scale.set(1, 1, 1);
                 object.rotation.y = Math.PI;
                 
                 scene.add(object);
