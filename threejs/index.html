@@ -114,11 +114,11 @@
     <div id="error-message"></div>
     <button id="reset-btn">重置视角</button>
     
-    <!-- 使用更可靠的CDN源 -->
+    <!-- 使用固定版本的库 -->
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     
+    <!-- 使用更可靠的 OrbitControls 加载方式 -->
     <script>
         // 增强的依赖加载和错误处理
         window.addEventListener('load', () => {
@@ -142,11 +142,11 @@
             
             // 检查依赖
             let loadedDependencies = 0;
-            const totalDependencies = 3; // THREE, Stats, OrbitControls
+            const totalDependencies = 2; // THREE, Stats
             
             function checkDependency(name, checkFn) {
                 let checks = 0;
-                const maxChecks = 50; // 最多检查50次
+                const maxChecks = 50;
                 
                 function check() {
                     checks++;
@@ -171,13 +171,29 @@
             updateStatus("检查Stats.js...", 30);
             checkDependency('Stats.js', () => !!window.Stats);
             
-            updateStatus("检查OrbitControls...", 60);
-            checkDependency('OrbitControls', () => !!THREE.OrbitControls);
+            // 动态加载 OrbitControls
+            updateStatus("加载OrbitControls...", 60);
+            const orbitScript = document.createElement('script');
+            orbitScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+            orbitScript.onload = () => {
+                if (typeof THREE.OrbitControls === 'function') {
+                    updateStatus("OrbitControls加载成功", 80);
+                    loadedDependencies++;
+                    loadApp();
+                } else {
+                    showError("OrbitControls加载失败");
+                    updateStatus("OrbitControls加载失败", 80);
+                }
+            };
+            orbitScript.onerror = () => {
+                showError("无法加载OrbitControls脚本");
+                updateStatus("OrbitControls加载失败", 80);
+            };
+            document.body.appendChild(orbitScript);
             
-            // 检查所有依赖
-            const checkInterval = setInterval(() => {
-                if (loadedDependencies === totalDependencies) {
-                    clearInterval(checkInterval);
+            // 加载应用
+            function loadApp() {
+                if (loadedDependencies === totalDependencies + 1) { // THREE + Stats + OrbitControls
                     updateStatus("所有依赖加载完成，正在启动场景...", 90);
                     
                     // 加载应用脚本
@@ -216,7 +232,7 @@
                     
                     document.body.appendChild(script);
                 }
-            }, 100);
+            }
         });
     </script>
 </body>
