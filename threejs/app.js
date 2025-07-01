@@ -128,7 +128,7 @@ function initApp(THREE, Stats, OrbitControls) {
                 
                 // 调整模型位置和大小
                 object.position.set(0, 0, 1);
-                object.scale.set(1, 1, 1);
+                object.scale.set(1.5, 1.5, 1.5);
                 object.rotation.y = Math.PI;
                 
                 scene.add(object);
@@ -204,6 +204,13 @@ function initApp(THREE, Stats, OrbitControls) {
             torus.rotation.x = time * 0.6;
             torus.rotation.y = time * 0.4;
             torus.position.x = -3 + Math.cos(time * 0.8) * 2;
+
+            
+            
+            // 外部导入模型动画
+            modelUrl.rotation.x = time * 0.6;
+            modelUrl.rotation.y = time * 0.4;
+            modelUrl.position.x = -3 + Math.cos(time * 0.8) * 3;
             
             controls.update();
             renderer.render(scene, camera);
