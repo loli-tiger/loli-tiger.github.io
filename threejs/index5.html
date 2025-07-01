@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拉丝不锈钢材质 - Three.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 400px;
+            z-index: 10;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            color: #4db8ff;
+            font-size: 24px;
+        }
+        p {
+            margin: 8px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .property {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        label {
+            font-weight: bold;
+            color: #4db8ff;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .control-group label {
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        .control-group input {
+            width: 150px;
+        }
+        .model-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+        .model-selector button {
+            background: #4db8ff;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .model-selector button:hover {
+            background: #0099ff;
+        }
+        .highlight {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    
+    <div id="info">
+        <h1>拉丝不锈钢材质效果</h1>
+        <p>这种材质通过结合以下技术实现：</p>
+        <div class="property">
+            <label>金属感:</label>
+            <span>MeshPhysicalMaterial.metalness ≈ 1.0</span>
+        </div>
+        <div class="property">
+            <label>粗糙度:</label>
+            <span>MeshPhysicalMaterial.roughness ≈ 0.3</span>
+        </div>
+        <div class="property">
+            <label>法线贴图:</label>
+            <span>模拟表面拉丝纹理</span>
+        </div>
+        <div class="property">
+            <label>环境光遮蔽:</label>
+            <span>增强表面细节</span>
+        </div>
+        <div class="property">
+            <label>清漆层:</label>
+            <span>MeshPhysicalMaterial.clearcoat ≈ 0.8</span>
+        </div>
+        <p>使用 <span class="highlight">MeshPhysicalMaterial</span> 并精心调整参数，可以创建出逼真的金属表面效果。</p>
+    </div>
+    
+    <div id="controls">
+        <div class="control-group">
+            <label for="metalness">金属感 (Metalness)</label>
+            <input type="range" id="metalness" min="0" max="1" step="0.01" value="0.95">
+        </div>
+        <div class="control-group">
+            <label for="roughness">粗糙度 (Roughness)</label>
+            <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <div class="control-group">
+            <label for="clearcoat">清漆层 (Clearcoat)</label>
+            <input type="range" id="clearcoat" min="0" max="1" step="0.01" value="0.8">
+        </div>
+    </div>
+    
+    <div class="model-selector">
+        <button onclick="changeModel('sphere')">球体</button>
+        <button onclick="changeModel('torus')">圆环</button>
+        <button onclick="changeModel('teapot')">茶壶</button>
+        <button onclick="changeModel('suzanne')">苏珊</button>
+    </div>
+
+    <script>
+        // 场景设置
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a2a6c);
+        scene.fog = new THREE.Fog(0x1a2a6c, 20, 50);
+        
+        // 相机设置
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 8);
+        
+        // 渲染器设置
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('container').appendChild(renderer.domElement);
+        
+        // 轨道控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // 创建拉丝不锈钢材质
+        function createBrushedMetalMaterial() {
+            // 创建程序化拉丝法线贴图
+            const canvas = document.createElement('canvas');
+            const size = 512;
+            canvas.width = size;
+            canvas.height = size;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 创建拉丝效果
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < size; i += 4) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(size, i + Math.random() * 10 - 5);
+                ctx.stroke();
+            }
+            
+            // 转换为Three.js纹理
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(4, 4);
+            
+            // 创建材质
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0xcccccc,
+                metalness: 0.95,
+                roughness: 0.35,
+                normalMap: texture,
+                normalScale: new THREE.Vector2(0.2, 0.2),
+                clearcoat: 0.8,
+                clearcoatRoughness: 0.1,
+                envMapIntensity: 1.2
+            });
+            
+            return material;
+        }
+        
+        // 创建环境光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        
+        // 创建方向光
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        scene.add(directionalLight);
+        
+        // 添加半球光增强环境效果
+        const hemisphereLight = new THREE.HemisphereLight(0x4477ff, 0x224433, 0.3);
+        scene.add(hemisphereLight);
+        
+        // 创建地面
+        const groundGeometry = new THREE.PlaneGeometry(20, 20);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x334455,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -2.5;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // 添加网格辅助
+        const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+        gridHelper.position.y = -2.49;
+        scene.add(gridHelper);
+        
+        // 创建金属物体
+        let currentModel = null;
+        const brushedMetalMaterial = createBrushedMetalMaterial();
+        
+        function createModel(type) {
+            if (currentModel) scene.remove(currentModel);
+            
+            let geometry;
+            
+            switch(type) {
+                case 'torus':
+                    geometry = new THREE.TorusGeometry(1.2, 0.4, 32, 100);
+                    break;
+                case 'teapot':
+                    // 茶壶几何体 - 简化版
+                    geometry = new THREE.CylinderGeometry(0.8, 0.8, 1.5, 32);
+                    const lid = new THREE.CylinderGeometry(0.5, 0.8, 0.3, 32);
+                    lid.translate(0, 1.1, 0);
+                    geometry.merge(lid);
+                    
+                    const spout = new THREE.ConeGeometry(0.15, 1, 16);
+                    spout.rotateZ(Math.PI/2);
+                    spout.translate(1.3, 0.2, 0);
+                    geometry.merge(spout);
+                    
+                    const handle = new THREE.TorusGeometry(0.5, 0.1, 16, 32);
+                    handle.rotateZ(Math.PI/2);
+                    handle.translate(-1, 0.2, 0);
+                    geometry.merge(handle);
+                    break;
+                case 'suzanne':
+                    geometry = new THREE.IcosahedronGeometry(1.3, 3);
+                    break;
+                case 'sphere':
+                default:
+                    geometry = new THREE.SphereGeometry(1.5, 64, 64);
+            }
+            
+            currentModel = new THREE.Mesh(geometry, brushedMetalMaterial);
+            currentModel.castShadow = true;
+            currentModel.receiveShadow = true;
+            scene.add(currentModel);
+            
+            return currentModel;
+        }
+        
+        // 初始模型
+        let model = createModel('sphere');
+        
+        // 添加一些装饰性物体
+        const decoObjects = [];
+        const decoGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const decoMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xcccccc,
+            metalness: 0.95,
+            roughness: 0.3
+        });
+        
+        for (let i = 0; i < 6; i++) {
+            const deco = new THREE.Mesh(decoGeometry, decoMaterial);
+            deco.position.set(
+                Math.sin(i * Math.PI/3) * 4,
+                -1,
+                Math.cos(i * Math.PI/3) * 4
+            );
+            deco.castShadow = true;
+            deco.receiveShadow = true;
+            scene.add(deco);
+            decoObjects.push(deco);
+        }
+        
+        // 动画循环
+        const clock = new THREE.Clock();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = clock.getElapsedTime();
+            
+            // 旋转模型
+            if (model) {
+                model.rotation.x = time * 0.2;
+                model.rotation.y = time * 0.3;
+            }
+            
+            // 旋转装饰物体
+            decoObjects.forEach((obj, idx) => {
+                obj.rotation.x = time * 0.1 * (idx + 1);
+                obj.rotation.y = time * 0.15 * (idx + 1);
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // 交互控制
+        document.getElementById('metalness').addEventListener('input', (e) => {
+            brushedMetalMaterial.metalness = parseFloat(e.target.value);
+        });
+        
+        document.getElementById('roughness').addEventListener('input', (e) => {
+            brushedMetalMaterial.roughness = parseFloat(e.target.value);
+        });
+        
+        document.getElementById('clearcoat').addEventListener('input', (e) => {
+            brushedMetalMaterial.clearcoat = parseFloat(e.target.value);
+        });
+        
+        // 模型切换
+        function changeModel(type) {
+            model = createModel(type);
+        }
+    </script>
+</body>
+</html>
