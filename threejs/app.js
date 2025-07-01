@@ -133,6 +133,9 @@ function initApp(THREE, Stats, OrbitControls) {
                 
                 scene.add(object);
                 statusText.textContent = "外部模型加载完成!";
+
+                 // 保存模型引用
+                externalModel = object;
                 
                 console.log("模型加载成功:", object);
             },
@@ -207,10 +210,12 @@ function initApp(THREE, Stats, OrbitControls) {
 
             
             
-            // 外部导入模型动画
-            modelUrl.rotation.x = time * 0.6;
-            modelUrl.rotation.y = time * 0.4;
-            modelUrl.position.x = -3 + Math.cos(time * 0.8) * 3;
+            // 外部导入模型动画 - 修复后的代码
+            if (externalModel) {
+                externalModel.rotation.x = time * 0.6;
+                externalModel.rotation.y = time * 0.4;
+                externalModel.position.x = -3 + Math.cos(time * 0.8) * 3;
+            }
             
             controls.update();
             renderer.render(scene, camera);
