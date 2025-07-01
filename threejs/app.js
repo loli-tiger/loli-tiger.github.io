@@ -103,7 +103,7 @@ function initApp(THREE, Stats, OrbitControls) {
         const loader = new THREE.OBJLoader();
         
         // 使用一个可靠的模型URL
-        const modelUrl = 'https://threejs.org/examples/models/obj/male02/male02.obj';
+        const modelUrl = '3.obj';
         
         loader.load(
             modelUrl,
