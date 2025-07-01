@@ -3,8 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <title>3D场景加载器</title>
-    <!-- 确保加载 OBJLoader -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <style>
         * {
             margin: 0;
@@ -141,7 +139,8 @@
             }
             
             let loadedDependencies = 0;
-            const totalDependencies = 2;
+            // 添加更多依赖项
+            const totalDependencies = 4; // THREE, Stats, OrbitControls, OBJLoader
             
             function checkDependency(name, checkFn) {
                 let checks = 0;
@@ -167,67 +166,92 @@
             updateStatus("检查Three.js...", 10);
             checkDependency('Three.js', () => !!window.THREE);
             
-            updateStatus("检查Stats.js...", 30);
+            updateStatus("检查Stats.js...", 20);
             checkDependency('Stats.js', () => !!window.Stats);
             
-            updateStatus("加载OrbitControls...", 60);
+            // 动态加载 OrbitControls
+            updateStatus("加载OrbitControls...", 30);
             const orbitScript = document.createElement('script');
             orbitScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
             orbitScript.onload = () => {
                 if (typeof THREE.OrbitControls === 'function') {
-                    updateStatus("OrbitControls加载成功", 80);
+                    updateStatus("OrbitControls加载成功", 50);
                     loadedDependencies++;
-                    loadApp();
+                    checkDependenciesComplete();
                 } else {
                     showError("OrbitControls加载失败");
-                    updateStatus("OrbitControls加载失败", 80);
+                    updateStatus("OrbitControls加载失败", 50);
                 }
             };
             orbitScript.onerror = () => {
                 showError("无法加载OrbitControls脚本");
-                updateStatus("OrbitControls加载失败", 80);
+                updateStatus("OrbitControls加载失败", 50);
             };
             document.body.appendChild(orbitScript);
             
-            function loadApp() {
-                if (loadedDependencies === totalDependencies + 1) {
-                    updateStatus("所有依赖加载完成，正在启动场景...", 90);
-                    
-                    const script = document.createElement('script');
-                    script.src = 'app.js';
-                    script.onload = () => {
-                        updateStatus("正在初始化场景...", 95);
-                        try {
-                            if (typeof initApp === 'function') {
-                                setTimeout(() => {
-                                    try {
-                                        initApp(THREE, Stats, THREE.OrbitControls);
-                                        updateStatus("场景加载成功!", 100);
-                                        setTimeout(() => {
-                                            loadingEl.style.display = 'none';
-                                        }, 1000);
-                                    } catch (e) {
-                                        showError("场景初始化失败: " + e.message);
-                                        updateStatus("初始化失败", 100);
-                                    }
-                                }, 500);
-                            } else {
-                                showError("initApp函数未定义");
-                                updateStatus("应用脚本加载失败", 100);
-                            }
-                        } catch (e) {
-                            showError("脚本加载错误: " + e.message);
-                            updateStatus("加载失败", 100);
-                        }
-                    };
-                    
-                    script.onerror = () => {
-                        showError("无法加载app.js");
-                        updateStatus("应用脚本加载失败", 100);
-                    };
-                    
-                    document.body.appendChild(script);
+            // 动态加载 OBJLoader
+            updateStatus("加载OBJLoader...", 60);
+            const objLoaderScript = document.createElement('script');
+            objLoaderScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js';
+            objLoaderScript.onload = () => {
+                // 检查是否已注册到 THREE 对象
+                if (typeof THREE.OBJLoader === 'function') {
+                    updateStatus("OBJLoader加载成功", 80);
+                    loadedDependencies++;
+                    checkDependenciesComplete();
+                } else {
+                    showError("OBJLoader加载失败");
+                    updateStatus("OBJLoader加载失败", 80);
                 }
+            };
+            objLoaderScript.onerror = () => {
+                showError("无法加载OBJLoader脚本");
+                updateStatus("OBJLoader加载失败", 80);
+            };
+            document.body.appendChild(objLoaderScript);
+            
+            function checkDependenciesComplete() {
+                if (loadedDependencies === totalDependencies) {
+                    updateStatus("所有依赖加载完成，正在启动场景...", 90);
+                    loadApp();
+                }
+            }
+            
+            function loadApp() {
+                const script = document.createElement('script');
+                script.src = 'app.js';
+                script.onload = () => {
+                    updateStatus("正在初始化场景...", 95);
+                    try {
+                        if (typeof initApp === 'function') {
+                            setTimeout(() => {
+                                try {
+                                    initApp(THREE, Stats, THREE.OrbitControls);
+                                    updateStatus("场景加载成功!", 100);
+                                    setTimeout(() => {
+                                        loadingEl.style.display = 'none';
+                                    }, 1000);
+                                } catch (e) {
+                                    showError("场景初始化失败: " + e.message);
+                                    updateStatus("初始化失败", 100);
+                                }
+                            }, 500);
+                        } else {
+                            showError("initApp函数未定义");
+                            updateStatus("应用脚本加载失败", 100);
+                        }
+                    } catch (e) {
+                        showError("脚本加载错误: " + e.message);
+                        updateStatus("加载失败", 100);
+                    }
+                };
+                
+                script.onerror = () => {
+                    showError("无法加载app.js");
+                    updateStatus("应用脚本加载失败", 100);
+                };
+                
+                document.body.appendChild(script);
             }
         });
     </script>
