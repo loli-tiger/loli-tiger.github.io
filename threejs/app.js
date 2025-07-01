@@ -117,6 +117,15 @@ function initApp(THREE, Stats, OrbitControls) {
             camera.lookAt(0, 0, 0);
             controls.reset();
         });
+
+         // 添加窗口大小变化监听
+    window.addEventListener('resize', () => {
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+        camera.aspect = newWidth / newHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(newWidth, newHeight);
+    });
         
         // 动画循环
         statusText.textContent = "启动动画循环...";
