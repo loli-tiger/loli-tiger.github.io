@@ -7,7 +7,8 @@
         body { 
             margin: 0; 
             overflow: hidden;
-            font-family: Arial, sans-serif; /* 添加默认字体 */
+            font-family: Arial, sans-serif;
+            background: #222;
         }
         #stats-container {
             position: fixed;
@@ -15,7 +16,6 @@
             left: 0;
             z-index: 100;
         }
-        /* 添加加载提示样式 */
         #loading {
             position: fixed;
             top: 50%;
@@ -24,52 +24,65 @@
             color: white;
             font-size: 24px;
             z-index: 10;
+            text-align: center;
+        }
+        #reset-btn {
+            position: fixed;
+            top: 40px;
+            left: 10px;
+            padding: 8px 15px;
+            z-index: 100;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        #reset-btn:hover {
+            background: #666;
         }
     </style>
 </head>
 <body>
-    <!-- 添加加载提示 -->
-    <div id="loading">加载中...</div>
-    <!-- FPS计数器容器 -->
+    <div id="loading">初始化Three.js场景...</div>
     <div id="stats-container"></div>
-    <!-- 使用正确的Stats.js UMD版本 -->
+    <button id="reset-btn">重置视角</button>
+    
+    <!-- 使用固定版本的库 -->
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
-
-    <!-- 使用importmap解决裸模块说明符问题 -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.skypack.dev/three@0.162.0",
-            "three/examples/jsm/controls/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/controls/OrbitControls.js"
-        }
-    }
-    </script>
-    <script type="module">
-        // 添加加载状态管理
-        document.getElementById('loading').textContent = '加载Three.js...';
-        try {
-            // 使用importmap中的路径
-            import * as THREE from 'three';
-            import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-            
-            // 检查Stats是否加载
-            function checkStats() {
-                if (typeof Stats === 'function') {
-                    document.getElementById('loading').textContent = '初始化场景...';
-                    import('./app.js').then(module => {
-                        module.default(THREE, Stats, OrbitControls);
-                        document.getElementById('loading').style.display = 'none';
-                    });
+    <script src="https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.162.0/examples/js/controls/OrbitControls.min.js"></script>
+    
+    <script>
+        // 确保所有依赖加载完成
+        window.addEventListener('load', () => {
+            // 检查所有依赖是否已加载
+            function checkDependencies() {
+                if (typeof THREE !== 'undefined' && 
+                    typeof Stats !== 'undefined' && 
+                    typeof THREE.OrbitControls !== 'undefined') {
+                    
+                    // 加载应用逻辑
+                    const script = document.createElement('script');
+                    script.src = 'app.js';
+                    script.onload = () => {
+                        document.getElementById('loading').textContent = '启动场景...';
+                        // 延迟启动确保所有资源就绪
+                        setTimeout(() => {
+                            initApp(THREE, Stats, THREE.OrbitControls);
+                            document.getElementById('loading').style.display = 'none';
+                        }, 100);
+                    };
+                    document.body.appendChild(script);
                 } else {
-                    setTimeout(checkStats, 50);
+                    setTimeout(checkDependencies, 50);
                 }
             }
             
-            checkStats();
-        } catch (error) {
-            console.error("加载错误:", error);
-            document.getElementById('loading').textContent = `加载失败: ${error.message}`;
-        }
+            checkDependencies();
+        });
     </script>
 </body>
 </html>
