@@ -4,86 +4,219 @@
     <meta charset="utf-8" />
     <title>Three.js Demo</title>
     <style>
-        body { 
-            margin: 0; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             overflow: hidden;
             font-family: Arial, sans-serif;
-            background: #222;
+            background: #111;
+            color: #fff;
         }
         #stats-container {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 10px;
+            left: 10px;
             z-index: 100;
         }
         #loading {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 24px;
-            z-index: 10;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #loading h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        #loading p {
+            font-size: 18px;
+            margin: 5px 0;
+            max-width: 80%;
             text-align: center;
+        }
+        #progress-bar {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        #progress {
+            height: 100%;
+            width: 0%;
+            background: #4CAF50;
+            transition: width 0.3s;
         }
         #reset-btn {
             position: fixed;
-            top: 40px;
-            left: 10px;
-            padding: 8px 15px;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
             z-index: 100;
-            background: #444;
+            background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s;
         }
         #reset-btn:hover {
-            background: #666;
+            background: #66BB6A;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        #error-message {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+            max-width: 400px;
         }
         canvas {
             display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
     </style>
 </head>
 <body>
-    <div id="loading">初始化Three.js场景...</div>
+    <div id="loading">
+        <h1>Three.js 场景加载中</h1>
+        <p id="status-text">正在初始化...</p>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <p>如果加载时间过长，请检查控制台错误信息</p>
+    </div>
+    
     <div id="stats-container"></div>
+    <div id="error-message"></div>
     <button id="reset-btn">重置视角</button>
     
-    <!-- 使用固定版本的库 -->
+    <!-- 使用更可靠的CDN源 -->
     <script src="https://cdn.jsdelivr.net/npm/stats.js@0.17.0/build/stats.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.min.js"></script>
-    
-    <!-- 使用正确的OrbitControls版本 -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.162.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.min.js"></script>
     
     <script>
-        // 确保所有依赖加载完成
+        // 增强的依赖加载和错误处理
         window.addEventListener('load', () => {
-            // 检查所有依赖是否已加载
-            function checkDependencies() {
-                if (window.THREE && window.Stats && THREE.OrbitControls) {
-                    // 加载应用逻辑
+            const loadingEl = document.getElementById('loading');
+            const statusText = document.getElementById('status-text');
+            const progressBar = document.getElementById('progress');
+            const errorMessage = document.getElementById('error-message');
+            
+            // 更新加载状态
+            function updateStatus(text, progress) {
+                statusText.textContent = text;
+                progressBar.style.width = progress + '%';
+            }
+            
+            // 显示错误
+            function showError(message) {
+                errorMessage.textContent = "错误: " + message;
+                errorMessage.style.display = 'block';
+                console.error(message);
+            }
+            
+            // 检查依赖
+            let loadedDependencies = 0;
+            const totalDependencies = 3; // THREE, Stats, OrbitControls
+            
+            function checkDependency(name, checkFn) {
+                let checks = 0;
+                const maxChecks = 50; // 最多检查50次
+                
+                function check() {
+                    checks++;
+                    if (checkFn()) {
+                        loadedDependencies++;
+                        updateStatus(`已加载: ${name}`, (loadedDependencies / totalDependencies) * 100);
+                        return true;
+                    } else if (checks < maxChecks) {
+                        setTimeout(check, 100);
+                    } else {
+                        showError(`加载失败: ${name} 未找到`);
+                    }
+                    return false;
+                }
+                
+                return check();
+            }
+            
+            updateStatus("检查Three.js...", 10);
+            checkDependency('Three.js', () => !!window.THREE);
+            
+            updateStatus("检查Stats.js...", 30);
+            checkDependency('Stats.js', () => !!window.Stats);
+            
+            updateStatus("检查OrbitControls...", 60);
+            checkDependency('OrbitControls', () => !!THREE.OrbitControls);
+            
+            // 检查所有依赖
+            const checkInterval = setInterval(() => {
+                if (loadedDependencies === totalDependencies) {
+                    clearInterval(checkInterval);
+                    updateStatus("所有依赖加载完成，正在启动场景...", 90);
+                    
+                    // 加载应用脚本
                     const script = document.createElement('script');
                     script.src = 'app.js';
                     script.onload = () => {
-                        document.getElementById('loading').textContent = '启动场景...';
-                        // 延迟启动确保所有资源就绪
-                        setTimeout(() => {
-                            initApp(THREE, Stats, THREE.OrbitControls);
-                            document.getElementById('loading').style.display = 'none';
-                        }, 100);
+                        updateStatus("正在初始化场景...", 95);
+                        try {
+                            if (typeof initApp === 'function') {
+                                setTimeout(() => {
+                                    try {
+                                        initApp(THREE, Stats, THREE.OrbitControls);
+                                        updateStatus("场景加载成功!", 100);
+                                        setTimeout(() => {
+                                            loadingEl.style.display = 'none';
+                                        }, 1000);
+                                    } catch (e) {
+                                        showError("场景初始化失败: " + e.message);
+                                        updateStatus("初始化失败", 100);
+                                    }
+                                }, 500);
+                            } else {
+                                showError("initApp函数未定义");
+                                updateStatus("应用脚本加载失败", 100);
+                            }
+                        } catch (e) {
+                            showError("脚本加载错误: " + e.message);
+                            updateStatus("加载失败", 100);
+                        }
                     };
+                    
+                    script.onerror = () => {
+                        showError("无法加载app.js");
+                        updateStatus("应用脚本加载失败", 100);
+                    };
+                    
                     document.body.appendChild(script);
-                } else {
-                    setTimeout(checkDependencies, 50);
                 }
-            }
-            
-            checkDependencies();
+            }, 100);
         });
     </script>
 </body>
