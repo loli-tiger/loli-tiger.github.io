@@ -1,338 +1,257 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级拉丝不锈钢材质 - Three.js</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <title>Three.js 场景演示</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
+            margin: 0;
             overflow: hidden;
-            background: linear-gradient(135deg, #0a1929, #1a2a6c);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #e0f7ff;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
         }
-        
         #container {
             position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
         }
-        
         #info {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(0, 15, 30, 0.85);
-            color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 400px;
-            z-index: 10;
-            border: 1px solid rgba(100, 180, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 30, 60, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        
-        h1 {
-            margin: 0 0 15px 0;
-            color: #64b4ff;
-            font-size: 26px;
-            text-shadow: 0 0 10px rgba(100, 180, 255, 0.5);
-        }
-        
-        p {
-            margin: 12px 0;
-            font-size: 17px;
-            line-height: 1.6;
-        }
-        
-        .property {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(100, 180, 255, 0.2);
-        }
-        
-        label {
-            font-weight: bold;
-            color: #64b4ff;
-            min-width: 120px;
-        }
-        
-        .value {
-            text-align: right;
-            flex-grow: 1;
-        }
-        
-        #controls {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 15, 30, 0.85);
-            padding: 20px 25px;
-            border-radius: 15px;
-            display: flex;
-            gap: 25px;
-            z-index: 10;
-            border: 1px solid rgba(100, 180, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 30, 60, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 180px;
-        }
-        
-        .control-group label {
-            margin-bottom: 10px;
-            color: #a4d4ff;
-            font-size: 16px;
-            text-align: center;
-            width: 100%;
-        }
-        
-        .control-group input {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            background: rgba(100, 180, 255, 0.2);
-            border-radius: 4px;
-            outline: none;
-        }
-        
-        .control-group input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #64b4ff;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(100, 180, 255, 0.8);
-        }
-        
-        .model-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 15, 30, 0.85);
+            background: rgba(0, 0, 0, 0.7);
             padding: 15px;
-            border-radius: 15px;
-            z-index: 10;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-width: 300px;
-            border: 1px solid rgba(100, 180, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 30, 60, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        
-        .model-selector button {
-            background: linear-gradient(135deg, #1a6fc4, #64b4ff);
-            border: none;
-            color: #fff;
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            flex: 1;
-            min-width: 100px;
-            box-shadow: 0 4px 15px rgba(26, 111, 196, 0.4);
-        }
-        
-        .model-selector button:hover {
-            background: linear-gradient(135deg, #64b4ff, #1a6fc4);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 111, 196, 0.6);
-        }
-        
-        .highlight {
-            color: #ffcc66;
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(255, 204, 102, 0.5);
-        }
-        
-        #title {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 5rem;
-            font-weight: 800;
-            color: rgba(100, 180, 255, 0.15);
-            z-index: 0;
-            pointer-events: none;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 10px;
-            white-space: nowrap;
-        }
-        
-        .instruction {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 15, 30, 0.7);
-            padding: 12px 20px;
             border-radius: 10px;
-            font-size: 15px;
-            z-index: 10;
-            border: 1px solid rgba(100, 180, 255, 0.3);
+            max-width: 300px;
             backdrop-filter: blur(5px);
         }
-        
-        .reflection {
+        #controls {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(to top, rgba(0, 30, 60, 0.8), transparent);
-            z-index: 5;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        button {
+            background: #4a69bd;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #1e3799;
+            transform: translateY(-2px);
+        }
+        h1 {
+            margin-top: 0;
+            color: #ff9f43;
+            font-size: 1.8rem;
+        }
+        .highlight {
+            color: #ff9f43;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="container"></div>
-    <div id="title">BRUSHED METAL</div>
-    
-    <div id="info">
-        <h1>高级拉丝不锈钢材质</h1>
-        <p>优化后的材质通过以下技术增强真实感：</p>
-        <div class="property">
-            <label>金属感:</label>
-            <span class="value">0.95 → <span class="highlight">0.98</span></span>
+    <div id="container">
+        <div id="canvas-container"></div>
+        
+        <div id="info">
+            <h1>Three.js 场景演示</h1>
+            <p>这个演示使用了Three.js核心功能，包括：</p>
+            <ul>
+                <li>场景创建与管理</li>
+                <li>3D几何体渲染（立方体）</li>
+                <li>材质和纹理应用</li>
+                <li>灯光系统（环境光+点光源）</li>
+                <li>相机控制（轨道控制）</li>
+                <li>动画循环系统</li>
+            </ul>
+            <p>使用鼠标拖拽旋转场景，滚轮缩放视图。</p>
+            <p>文件版本: <span class="highlight">143dev</span></p>
         </div>
-        <div class="property">
-            <label>粗糙度:</label>
-            <span class="value">0.35 → <span class="highlight">0.25</span></span>
-        </div>
-        <div class="property">
-            <label>法线强度:</label>
-            <span class="value">0.2 → <span class="highlight">0.5</span></span>
-        </div>
-        <div class="property">
-            <label>清漆层:</label>
-            <span class="value">0.8 → <span class="highlight">1.0</span></span>
-        </div>
-        <div class="property">
-            <label>环境反射:</label>
-            <span class="value"><span class="highlight">新增环境贴图</span></span>
-        </div>
-        <p>使用 <span class="highlight">MeshPhysicalMaterial</span> 和精心设计的拉丝纹理，模拟真实不锈钢表面。</p>
-    </div>
-    
-    <div id="controls">
-        <div class="control-group">
-            <label for="metalness">金属感 (Metalness)</label>
-            <input type="range" id="metalness" min="0.8" max="1" step="0.01" value="0.98">
-        </div>
-        <div class="control-group">
-            <label for="roughness">粗糙度 (Roughness)</label>
-            <input type="range" id="roughness" min="0.1" max="0.5" step="0.01" value="0.25">
-        </div>
-        <div class="control-group">
-            <label for="normalScale">法线强度 (Normal)</label>
-            <input type="range" id="normalScale" min="0" max="1" step="0.01" value="0.5">
+        
+        <div id="controls">
+            <button id="addCube">添加立方体</button>
+            <button id="changeColor">改变颜色</button>
+            <button id="toggleLight">切换灯光</button>
+            <button id="reset">重置场景</button>
         </div>
     </div>
-    
-    <div class="model-selector">
-        <button onclick="changeModel('sphere')">球体</button>
-        <button onclick="changeModel('torus')">圆环</button>
-        <button onclick="changeModel('cylinder')">圆柱</button>
-        <button onclick="changeModel('box')">立方体</button>
-        <button onclick="changeModel('cone')">圆锥</button>
-        <button onclick="changeModel('suzanne')">苏珊</button>
-    </div>
-    
-    <div class="instruction">使用鼠标拖动旋转视角，滚轮缩放，右键平移</div>
-    <div class="reflection"></div>
 
+    <!-- 引入上传的Three.js打包文件 -->
+    <script src="https://camera-webgi.vercel.app/src.18f50172.js"></script>
+    
     <script>
-        // 场景设置
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a1929);
-        scene.fog = new THREE.Fog(0x0a1929, 15, 40);
+        // 当页面加载完成后初始化场景
+        document.addEventListener('DOMContentLoaded', initScene);
         
-        // 相机设置
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 2, 10);
+        // 全局变量
+        let scene, camera, renderer;
+        let cubes = [];
+        let pointLight;
+        let orbitControls;
         
-        // 渲染器设置
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            powerPreference: "high-performance"
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.outputEncoding = THREE.sRGBEncoding;
-        document.getElementById('container').appendChild(renderer.domElement);
+        function initScene() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(
+                75, 
+                window.innerWidth / window.innerHeight, 
+                0.1, 
+                1000
+            );
+            camera.position.z = 5;
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // 添加轨道控制
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.enableDamping = true;
+            orbitControls.dampingFactor = 0.05;
+            
+            // 添加环境光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            // 添加点光源
+            pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+            
+            // 添加光源辅助
+            const lightHelper = new THREE.PointLightHelper(pointLight);
+            scene.add(lightHelper);
+            
+            // 添加坐标轴辅助
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+            
+            // 添加初始立方体
+            addCube();
+            
+            // 添加窗口大小调整监听
+            window.addEventListener('resize', onWindowResize);
+            
+            // 添加按钮事件监听
+            document.getElementById('addCube').addEventListener('click', addCube);
+            document.getElementById('changeColor').addEventListener('click', changeColors);
+            document.getElementById('toggleLight').addEventListener('click', toggleLight);
+            document.getElementById('reset').addEventListener('click', resetScene);
+            
+            // 开始动画循环
+            animate();
+        }
         
-        // 轨道控制器
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 5;
-        controls.maxDistance = 30;
+        function addCube() {
+            // 创建立方体几何体
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            
+            // 创建材质（随机颜色）
+            const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+            const material = new THREE.MeshPhongMaterial({ 
+                color: color,
+                shininess: 100,
+                specular: 0xffffff
+            });
+            
+            // 创建立方体网格
+            const cube = new THREE.Mesh(geometry, material);
+            
+            // 设置随机位置
+            cube.position.x = (Math.random() - 0.5) * 8;
+            cube.position.y = (Math.random() - 0.5) * 8;
+            cube.position.z = (Math.random() - 0.5) * 8;
+            
+            // 设置随机旋转
+            cube.rotation.x = Math.random() * Math.PI;
+            cube.rotation.y = Math.random() * Math.PI;
+            
+            // 添加到场景和立方体数组
+            scene.add(cube);
+            cubes.push(cube);
+        }
         
-        // 创建拉丝不锈钢材质
-        function createBrushedMetalMaterial() {
-            // 创建程序化拉丝法线贴图
-            const canvas = document.createElement('canvas');
-            const size = 1024; // 提高分辨率
-            canvas.width = size;
-            canvas.height = size;
+        function changeColors() {
+            cubes.forEach(cube => {
+                cube.material.color.setRGB(Math.random(), Math.random(), Math.random());
+            });
+        }
+        
+        function toggleLight() {
+            pointLight.visible = !pointLight.visible;
+        }
+        
+        function resetScene() {
+            // 移除所有立方体
+            cubes.forEach(cube => {
+                scene.remove(cube);
+            });
+            cubes = [];
             
-            const ctx = canvas.getContext('2d');
+            // 重置相机位置
+            camera.position.set(0, 0, 5);
+            camera.lookAt(0, 0, 0);
             
-            // 创建基础灰色背景
-            ctx.fillStyle = '#808080';
-            ctx.fillRect(0, 0, size, size);
+            // 添加一个新的立方体
+            addCube();
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
             
-            // 创建拉丝效果 - 更细更密的线条
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 0.8;
-            ctx.lineCap = 'round';
+            // 更新轨道控制
+            orbitControls.update();
             
-            // 主方向拉丝（水平）
-            for (let i = 0; i < size; i += 2) {
-                ctx.beginPath();
-                ctx.moveTo(0, i + Math.random() * 3 - 1.5);
-                ctx.lineTo(size, i + Math.random() * 3 - 1.5);
-                ctx.stroke();
-            }
+            // 旋转立方体
+            cubes.forEach((cube, index) => {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                
+                // 让立方体轻微上下浮动
+                cube.position.y = Math.sin(Date.now() * 0.001 + index) * 0.5;
+            });
             
-            // 次方向拉丝（轻微倾斜，增加随机性）
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            for (let i = 0; i < size; i += 6) {
-                const offset = Math.random() * 20 - 10;
-                ctx.beginPath();
-                ctx.moveTo(0, i + offset);
-                ctx.lineTo(size, i + offset + Math.random() * 20 - 10);
-                ctx.stroke();
-            }
+            // 旋转点光源
+            const time = Date.now() * 0.001;
+            pointLight.position.x = Math.sin(time) * 5;
+            pointLight.position.z = Math.cos(time) * 5;
             
-            // 转换为Three.js纹理
-            const texture = new THREE.Canvas
+            // 渲染场景
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
