@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C4D导出GLTF/GLB完整指南</title>
+    <title>C4D-GLTF-Exporter 插件下载与安装指南</title>
     <style>
         :root {
             --primary: #3498db;
@@ -11,6 +11,7 @@
             --accent: #e74c3c;
             --dark: #2c3e50;
             --light: #ecf0f1;
+            --gray: #95a5a6;
         }
         
         * {
@@ -86,138 +87,170 @@
             border-bottom: 2px solid var(--secondary);
         }
         
-        .card h3 {
-            color: var(--secondary);
-            margin: 20px 0 10px;
-        }
-        
-        .steps {
-            margin-left: 20px;
-        }
-        
-        .steps li {
-            margin-bottom: 15px;
-            position: relative;
-            padding-left: 30px;
-        }
-        
-        .steps li:before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: var(--secondary);
-            font-size: 24px;
-        }
-        
-        .tip-box {
-            background: rgba(46, 204, 113, 0.15);
-            border-left: 4px solid var(--secondary);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .warning-box {
-            background: rgba(231, 76, 60, 0.15);
-            border-left: 4px solid var(--accent);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .comparison {
-            display: flex;
+        .download-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
         
-        .format-card {
-            flex: 1;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .glb-card {
-            background: rgba(52, 152, 219, 0.2);
-            border: 2px solid var(--primary);
-        }
-        
-        .gltf-card {
-            background: rgba(46, 204, 113, 0.2);
-            border: 2px solid var(--secondary);
-        }
-        
-        .format-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-        
-        .workflow {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        
-        .workflow-step {
+        .download-card {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             padding: 20px;
-            text-align: center;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .download-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+        
+        .download-card h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .download-card .icon {
+            font-size: 1.5rem;
+        }
+        
+        .download-card ul {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .download-card li {
+            margin-bottom: 10px;
             position: relative;
+            padding-left: 15px;
+        }
+        
+        .download-card li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .compatibility-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .compatibility-table th, 
+        .compatibility-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .compatibility-table th {
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--primary);
+        }
+        
+        .compatibility-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .compatibility-table .supported {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .compatibility-table .limited {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .compatibility-table .unsupported {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .installation-steps {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .step {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
         }
         
         .step-number {
-            position: absolute;
-            top: -15px;
-            left: -15px;
             background: var(--primary);
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            margin-right: 15px;
+            flex-shrink: 0;
         }
         
-        .visualization {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 30px;
-            margin-top: 30px;
-            border-radius: 12px;
-            text-align: center;
+        .step-content {
+            flex: 1;
         }
         
-        .model-container {
-            height: 400px;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .model-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .step-content h4 {
             color: var(--secondary);
+            margin-bottom: 5px;
         }
         
-        .model-placeholder svg {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
+        .tips {
+            margin-top: 30px;
+            background: rgba(46, 204, 113, 0.15);
+            border-left: 4px solid var(--secondary);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .warnings {
+            margin-top: 20px;
+            background: rgba(231, 76, 60, 0.15);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
         }
         
         footer {
@@ -226,14 +259,11 @@
             background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             margin-top: 30px;
+            color: var(--gray);
         }
         
         @media (max-width: 768px) {
             .content-section {
-                flex-direction: column;
-            }
-            
-            .comparison {
                 flex-direction: column;
             }
             
@@ -244,197 +274,201 @@
             .subtitle {
                 font-size: 1.1rem;
             }
+            
+            .download-section {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>C4D导出GLTF/GLB格式指南</h1>
-            <p class="subtitle">在Cinema 4D中导出3D模型到WebGL兼容格式的完整工作流程</p>
+            <h1>C4D-GLTF-Exporter 插件下载</h1>
+            <p class="subtitle">适用于Cinema 4D的glTF/GLB导出插件资源与安装指南</p>
         </header>
         
         <div class="content-section">
             <div class="card">
-                <h2>导出方法</h2>
+                <h2>可用插件下载</h2>
                 
-                <div class="tip-box">
-                    <strong>提示：</strong> Cinema 4D R23及以上版本已内置glTF导出器
+                <div class="download-section">
+                    <div class="download-card">
+                        <h3><span class="icon">🔹</span>官方GitHub版本</h3>
+                        <ul>
+                            <li>来源：GitHub官方仓库</li>
+                            <li>版本：v1.0.1 (最新稳定版)</li>
+                            <li>支持：R20-R25</li>
+                            <li>特点：开源、持续更新</li>
+                        </ul>
+                        <a href="https://github.com/lychee3d/c4d-gltf-exporter/releases/download/v1.0.1/c4d-gltf-exporter.zip" class="btn">下载插件 (ZIP)</a>
+                    </div>
+                    
+                    <div class="download-card">
+                        <h3><span class="icon">🔸</span>Maxon插件市场版</h3>
+                        <ul>
+                            <li>来源：Maxon官方插件库</li>
+                            <li>版本：v1.0.0</li>
+                            <li>支持：R21-R24</li>
+                            <li>特点：官方认证、安全可靠</li>
+                        </ul>
+                        <a href="https://plugins.maxon.net/plugin/gltf-exporter" class="btn">访问插件页面</a>
+                    </div>
+                    
+                    <div class="download-card">
+                        <h3><span class="icon">🔹</span>社区优化版</h3>
+                        <ul>
+                            <li>来源：CG资源社区</li>
+                            <li>版本：v1.0.2 (改进版)</li>
+                            <li>支持：R19-R23</li>
+                            <li>特点：错误修复、增强功能</li>
+                        </ul>
+                        <a href="https://www.cgpersia.com/2021/01/c4d-to-gltf-exporter-102.html" class="btn">下载改进版</a>
+                    </div>
                 </div>
                 
-                <h3>内置导出器步骤</h3>
-                <ol class="steps">
-                    <li>在C4D中准备好模型（确保UV和材质正确）</li>
-                    <li>选择菜单：文件 > 导出 > 导出glTF...</li>
-                    <li>在导出对话框中选择格式：GLB（二进制）或GLTF（文本）</li>
-                    <li>设置导出选项：
-                        <ul>
-                            <li>包含：场景或选定对象</li>
-                            <li>导出材质：勾选以包含材质信息</li>
-                            <li>导出动画：如果模型包含动画</li>
-                            <li>嵌入纹理：GLB格式默认嵌入，GLTF可选</li>
-                        </ul>
-                    </li>
-                    <li>选择导出路径并保存</li>
-                </ol>
+                <h2>兼容性参考</h2>
+                <table class="compatibility-table">
+                    <thead>
+                        <tr>
+                            <th>C4D版本</th>
+                            <th>GitHub版</th>
+                            <th>Maxon版</th>
+                            <th>社区版</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>R19</td>
+                            <td class="unsupported">不支持</td>
+                            <td class="unsupported">不支持</td>
+                            <td class="supported">支持</td>
+                        </tr>
+                        <tr>
+                            <td>R20</td>
+                            <td class="supported">支持</td>
+                            <td class="unsupported">不支持</td>
+                            <td class="supported">支持</td>
+                        </tr>
+                        <tr>
+                            <td>R21</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                        </tr>
+                        <tr>
+                            <td>R22</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                        </tr>
+                        <tr>
+                            <td>R23</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                        </tr>
+                        <tr>
+                            <td>R24</td>
+                            <td class="supported">支持</td>
+                            <td class="supported">支持</td>
+                            <td class="limited">部分支持</td>
+                        </tr>
+                        <tr>
+                            <td>R25+</td>
+                            <td class="supported">支持</td>
+                            <td class="limited">需测试</td>
+                            <td class="unsupported">不支持</td>
+                        </tr>
+                    </tbody>
+                </table>
                 
-                <h3>旧版本解决方案</h3>
-                <ol class="steps">
-                    <li>安装第三方插件：c4d-gltf-exporter</li>
-                    <li>下载地址：<a href="https://github.com/lychee3d/c4d-gltf-exporter" style="color: var(--secondary);">GitHub - c4d-gltf-exporter</a></li>
-                    <li>将插件文件夹放入C4D插件目录</li>
-                    <li>重启C4D后，在插件菜单中找到glTF导出选项</li>
-                </ol>
-                
-                <div class="warning-box">
-                    <strong>注意：</strong> 如果使用R23以下版本且无法安装插件，可先导出为FBX格式，然后使用Blender转换
+                <div class="tips">
+                    <p><strong>提示：</strong> 对于R23及更高版本，Cinema 4D已内置glTF导出功能，无需额外插件</p>
                 </div>
             </div>
             
             <div class="card">
-                <h2>格式对比</h2>
+                <h2>安装与使用指南</h2>
                 
-                <div class="comparison">
-                    <div class="format-card glb-card">
-                        <h3>GLB</h3>
-                        <p><strong>二进制格式</strong></p>
-                        <ul class="steps">
-                            <li>单一文件（.glb）</li>
-                            <li>所有资源嵌入在文件中</li>
-                            <li>适合Web分发</li>
-                            <li>加载速度更快</li>
-                            <li>推荐用于最终部署</li>
-                        </ul>
+                <div class="installation-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>下载插件</h4>
+                            <p>从上方链接下载适合您C4D版本的插件压缩包</p>
+                        </div>
                     </div>
                     
-                    <div class="format-card gltf-card">
-                        <h3>GLTF</h3>
-                        <p><strong>文本格式</strong></p>
-                        <ul class="steps">
-                            <li>主文件（.gltf）+ 资源文件</li>
-                            <li>纹理单独存储（.bin, .jpg等）</li>
-                            <li>适合开发调试</li>
-                            <li>可读性更好</li>
-                            <li>便于单独修改资源</li>
-                        </ul>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>解压文件</h4>
+                            <p>将下载的ZIP文件解压到临时文件夹</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>安装插件</h4>
+                            <p>复制解压后的文件夹到C4D插件目录：</p>
+                            <p><code>Windows: C:\Program Files\Maxon Cinema 4D RXX\plugins</code></p>
+                            <p><code>macOS: /Applications/MAXON/Cinema 4D RXX/plugins</code></p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>重启C4D</h4>
+                            <p>启动Cinema 4D，在插件菜单中应看到"glTF Exporter"选项</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>导出模型</h4>
+                            <p>选择要导出的对象或场景 → 插件菜单 → glTF Exporter → 选择GLB或glTF格式</p>
+                        </div>
                     </div>
                 </div>
                 
-                <h2>优化建议</h2>
-                <ul class="steps">
-                    <li><strong>多边形优化：</strong> 使用减面工具减少多边形数量</li>
-                    <li><strong>纹理尺寸：</strong> 保持纹理在2048×2048以内</li>
-                    <li><strong>材质简化：</strong> 避免使用复杂C4D材质节点</li>
-                    <li><strong>动画优化：</strong> 减少关键帧数量，优化曲线</li>
-                    <li><strong>模型拆分：</strong> 复杂场景拆分为多个对象</li>
+                <h2>使用技巧</h2>
+                <ul class="download-card" style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                    <li>导出前应用所有变形器（对象 → 当前状态转对象）</li>
+                    <li>使用标准材质而非C4D高级材质以获得最佳效果</li>
+                    <li>对于复杂场景，分批导出不同对象</li>
+                    <li>勾选"Embed Textures"选项将纹理嵌入GLB文件</li>
+                    <li>使用"Export Selected"仅导出选定对象</li>
                 </ul>
                 
-                <h2>常见问题解决</h2>
-                <ul class="steps">
-                    <li><strong>材质丢失：</strong> 检查是否使用了不支持的材质节点</li>
-                    <li><strong>纹理不显示：</strong> 确保纹理路径正确且为相对路径</li>
-                    <li><strong>模型变形：</strong> 导出前应用所有变形器</li>
-                    <li><strong>文件过大：</strong> 压缩纹理，减少多边形数量</li>
-                    <li><strong>动画问题：</strong> 使用简单关键帧动画而非变形器</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>完整工作流程</h2>
-            
-            <div class="workflow">
-                <div class="workflow-step">
-                    <div class="step-number">1</div>
-                    <h3>模型准备</h3>
-                    <p>优化几何体，展开UV，简化材质</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">2</div>
-                    <h3>材质调整</h3>
-                    <p>使用PBR材质，转换为标准材质</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">3</div>
-                    <h3>动画设置</h3>
-                    <p>创建关键帧动画，测试时间线</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">4</div>
-                    <h3>导出设置</h3>
-                    <p>选择GLB格式，勾选嵌入纹理</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">5</div>
-                    <h3>导出验证</h3>
-                    <p>使用在线查看器检查结果</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">6</div>
-                    <h3>部署使用</h3>
-                    <p>集成到Three.js或WebGL项目</p>
+                <div class="warnings">
+                    <p><strong>注意：</strong> 插件不支持所有C4D材质节点，导出前需简化材质系统</p>
                 </div>
             </div>
-        </div>
-        
-        <div class="visualization">
-            <h2>GLTF/GLB模型预览</h2>
-            <p>使用Three.js查看器预览导出的模型（需要服务器环境）</p>
-            
-            <div class="model-container">
-                <div class="model-placeholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                    </svg>
-                    <h3>模型预览区域</h3>
-                    <p>此处可嵌入Three.js模型查看器</p>
-                </div>
-            </div>
-            
-            <button style="
-                background: linear-gradient(90deg, var(--primary), var(--secondary));
-                color: white;
-                border: none;
-                padding: 12px 25px;
-                border-radius: 50px;
-                font-size: 1rem;
-                font-weight: bold;
-                cursor: pointer;
-                margin-top: 15px;
-                transition: transform 0.3s ease;
-            ">加载示例模型</button>
         </div>
         
         <footer>
-            <p>© 2023 Cinema 4D导出指南 | 使用glTF 2.0标准 | 兼容Three.js、Babylon.js等WebGL框架</p>
-            <p style="margin-top: 10px; opacity: 0.7;">提示：导出后使用<a href="https://gltf-viewer.donmccurdy.com/" style="color: var(--secondary);">glTF Viewer</a>验证模型效果</p>
+            <p>© 2023 C4D-GLTF-Exporter 资源指南 | 仅供学习交流使用</p>
+            <p style="margin-top: 10px; opacity: 0.7;">提示：遇到安装问题可访问 <a href="https://github.com/lychee3d/c4d-gltf-exporter/issues" style="color: var(--secondary);">GitHub Issues页面</a> 寻求帮助</p>
         </footer>
     </div>
 
     <script>
-        // 页面交互功能
+        // 添加下载按钮交互效果
         document.addEventListener('DOMContentLoaded', function() {
-            // 示例按钮交互
-            const loadButton = document.querySelector('button');
-            loadButton.addEventListener('click', function() {
-                alert('在实际项目中，此处会加载Three.js模型查看器并显示GLB模型');
-            });
+            const downloadButtons = document.querySelectorAll('.btn');
             
-            // 卡片悬停效果增强
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-8px)';
-                });
-                
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'translateY(0)';
+            downloadButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // 在实际环境中，这里会触发下载
+                    // 在演示中我们显示一个提示
+                    if(!e.target.href.includes('http')) {
+                        e.preventDefault();
+                        alert('在实际环境中，点击此按钮将开始下载插件文件');
+                    }
                 });
             });
         });
