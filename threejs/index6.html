@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C4D导出GLTF/GLB完整指南</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --accent: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: var(--light);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: var(--light);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content-section {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+            gap: 30px;
+        }
+        
+        .card {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary);
+        }
+        
+        .card h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px;
+        }
+        
+        .steps {
+            margin-left: 20px;
+        }
+        
+        .steps li {
+            margin-bottom: 15px;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .steps li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-size: 24px;
+        }
+        
+        .tip-box {
+            background: rgba(46, 204, 113, 0.15);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: rgba(231, 76, 60, 0.15);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .comparison {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .format-card {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .glb-card {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid var(--primary);
+        }
+        
+        .gltf-card {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid var(--secondary);
+        }
+        
+        .format-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .workflow-step {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .visualization {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .model-container {
+            height: 400px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .model-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+        }
+        
+        .model-placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-section {
+                flex-direction: column;
+            }
+            
+            .comparison {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>C4D导出GLTF/GLB格式指南</h1>
+            <p class="subtitle">在Cinema 4D中导出3D模型到WebGL兼容格式的完整工作流程</p>
+        </header>
+        
+        <div class="content-section">
+            <div class="card">
+                <h2>导出方法</h2>
+                
+                <div class="tip-box">
+                    <strong>提示：</strong> Cinema 4D R23及以上版本已内置glTF导出器
+                </div>
+                
+                <h3>内置导出器步骤</h3>
+                <ol class="steps">
+                    <li>在C4D中准备好模型（确保UV和材质正确）</li>
+                    <li>选择菜单：文件 > 导出 > 导出glTF...</li>
+                    <li>在导出对话框中选择格式：GLB（二进制）或GLTF（文本）</li>
+                    <li>设置导出选项：
+                        <ul>
+                            <li>包含：场景或选定对象</li>
+                            <li>导出材质：勾选以包含材质信息</li>
+                            <li>导出动画：如果模型包含动画</li>
+                            <li>嵌入纹理：GLB格式默认嵌入，GLTF可选</li>
+                        </ul>
+                    </li>
+                    <li>选择导出路径并保存</li>
+                </ol>
+                
+                <h3>旧版本解决方案</h3>
+                <ol class="steps">
+                    <li>安装第三方插件：c4d-gltf-exporter</li>
+                    <li>下载地址：<a href="https://github.com/lychee3d/c4d-gltf-exporter" style="color: var(--secondary);">GitHub - c4d-gltf-exporter</a></li>
+                    <li>将插件文件夹放入C4D插件目录</li>
+                    <li>重启C4D后，在插件菜单中找到glTF导出选项</li>
+                </ol>
+                
+                <div class="warning-box">
+                    <strong>注意：</strong> 如果使用R23以下版本且无法安装插件，可先导出为FBX格式，然后使用Blender转换
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>格式对比</h2>
+                
+                <div class="comparison">
+                    <div class="format-card glb-card">
+                        <h3>GLB</h3>
+                        <p><strong>二进制格式</strong></p>
+                        <ul class="steps">
+                            <li>单一文件（.glb）</li>
+                            <li>所有资源嵌入在文件中</li>
+                            <li>适合Web分发</li>
+                            <li>加载速度更快</li>
+                            <li>推荐用于最终部署</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="format-card gltf-card">
+                        <h3>GLTF</h3>
+                        <p><strong>文本格式</strong></p>
+                        <ul class="steps">
+                            <li>主文件（.gltf）+ 资源文件</li>
+                            <li>纹理单独存储（.bin, .jpg等）</li>
+                            <li>适合开发调试</li>
+                            <li>可读性更好</li>
+                            <li>便于单独修改资源</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h2>优化建议</h2>
+                <ul class="steps">
+                    <li><strong>多边形优化：</strong> 使用减面工具减少多边形数量</li>
+                    <li><strong>纹理尺寸：</strong> 保持纹理在2048×2048以内</li>
+                    <li><strong>材质简化：</strong> 避免使用复杂C4D材质节点</li>
+                    <li><strong>动画优化：</strong> 减少关键帧数量，优化曲线</li>
+                    <li><strong>模型拆分：</strong> 复杂场景拆分为多个对象</li>
+                </ul>
+                
+                <h2>常见问题解决</h2>
+                <ul class="steps">
+                    <li><strong>材质丢失：</strong> 检查是否使用了不支持的材质节点</li>
+                    <li><strong>纹理不显示：</strong> 确保纹理路径正确且为相对路径</li>
+                    <li><strong>模型变形：</strong> 导出前应用所有变形器</li>
+                    <li><strong>文件过大：</strong> 压缩纹理，减少多边形数量</li>
+                    <li><strong>动画问题：</strong> 使用简单关键帧动画而非变形器</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>完整工作流程</h2>
+            
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <h3>模型准备</h3>
+                    <p>优化几何体，展开UV，简化材质</p>
+                </div>
+                
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <h3>材质调整</h3>
+                    <p>使用PBR材质，转换为标准材质</p>
+                </div>
+                
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <h3>动画设置</h3>
+                    <p>创建关键帧动画，测试时间线</p>
+                </div>
+                
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <h3>导出设置</h3>
+                    <p>选择GLB格式，勾选嵌入纹理</p>
+                </div>
+                
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <h3>导出验证</h3>
+                    <p>使用在线查看器检查结果</p>
+                </div>
+                
+                <div class="workflow-step">
+                    <div class="step-number">6</div>
+                    <h3>部署使用</h3>
+                    <p>集成到Three.js或WebGL项目</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <h2>GLTF/GLB模型预览</h2>
+            <p>使用Three.js查看器预览导出的模型（需要服务器环境）</p>
+            
+            <div class="model-container">
+                <div class="model-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    <h3>模型预览区域</h3>
+                    <p>此处可嵌入Three.js模型查看器</p>
+                </div>
+            </div>
+            
+            <button style="
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 50px;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 15px;
+                transition: transform 0.3s ease;
+            ">加载示例模型</button>
+        </div>
+        
+        <footer>
+            <p>© 2023 Cinema 4D导出指南 | 使用glTF 2.0标准 | 兼容Three.js、Babylon.js等WebGL框架</p>
+            <p style="margin-top: 10px; opacity: 0.7;">提示：导出后使用<a href="https://gltf-viewer.donmccurdy.com/" style="color: var(--secondary);">glTF Viewer</a>验证模型效果</p>
+        </footer>
+    </div>
+
+    <script>
+        // 页面交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 示例按钮交互
+            const loadButton = document.querySelector('button');
+            loadButton.addEventListener('click', function() {
+                alert('在实际项目中，此处会加载Three.js模型查看器并显示GLB模型');
+            });
+            
+            // 卡片悬停效果增强
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
