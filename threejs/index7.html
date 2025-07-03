@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js GLB模型加载器 - 支持文件上传</title>
+    <title>Three.js GLB模型加载器 - 支持HDR环境光</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/RGBELoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,7 +17,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
@@ -34,6 +36,18 @@
             border-radius: 20px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
         }
         
         h1 {
@@ -51,6 +65,7 @@
             max-width: 800px;
             margin: 0 auto;
             line-height: 1.6;
+            color: #a0d2eb;
         }
         
         .main-content {
@@ -63,7 +78,7 @@
         .canvas-section {
             flex: 1;
             min-width: 300px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -77,8 +92,8 @@
         }
         
         .control-section {
-            flex: 0 0 320px;
-            background: rgba(0, 0, 0, 0.7);
+            flex: 0 0 350px;
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 20px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -97,12 +112,30 @@
             padding: 20px;
             background: rgba(30, 30, 50, 0.5);
             border-radius: 15px;
+            position: relative;
+        }
+        
+        .control-group::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,138,0,0.5), transparent);
         }
         
         .control-group h3 {
             font-size: 1.4rem;
             margin-bottom: 15px;
             color: #e52e71;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group h3 i {
+            font-size: 1.6rem;
         }
         
         .slider-container {
@@ -120,7 +153,7 @@
             width: 100%;
             height: 12px;
             border-radius: 6px;
-            background: #333;
+            background: #222;
             outline: none;
             -webkit-appearance: none;
         }
@@ -133,6 +166,12 @@
             background: #ff8a00;
             cursor: pointer;
             box-shadow: 0 0 10px rgba(255, 138, 0, 0.7);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 138, 0, 0.9);
         }
         
         input[type="color"] {
@@ -141,6 +180,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            background: #222;
         }
         
         .value-display {
@@ -165,11 +205,28 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
         
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:active {
@@ -183,6 +240,20 @@
             text-align: center;
             margin-top: 20px;
             border: 2px dashed #4a6fc5;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(74, 111, 197, 0.2) 0%, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
         }
         
         .upload-container h3 {
@@ -316,7 +387,7 @@
         footer {
             text-align: center;
             padding: 25px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 15px;
             margin-top: 20px;
             font-size: 1rem;
@@ -345,6 +416,70 @@
         .instructions li {
             margin-bottom: 10px;
             line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .instructions li::before {
+            content: "•";
+            color: #ff8a00;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .hdr-preview {
+            width: 100%;
+            height: 150px;
+            background: #111;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #333;
+        }
+        
+        .hdr-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+        
+        .hdr-preview::after {
+            content: "HDR预览";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ff8a00;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .hdr-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .hdr-controls .btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .env-intensity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .env-intensity label {
+            margin-bottom: 0;
+            flex: 1;
         }
         
         @media (max-width: 768px) {
@@ -354,6 +489,10 @@
             
             .canvas-section {
                 height: 50vh;
+            }
+            
+            .control-section {
+                flex: 0 0 auto;
             }
             
             h1 {
@@ -370,7 +509,7 @@
     <div class="container">
         <header>
             <h1>Three.js GLB模型加载器</h1>
-            <p class="subtitle">支持本地GLB文件上传与实时交互操作 - 使用GLTFLoader加载并操作3D模型</p>
+            <p class="subtitle">支持本地GLB文件上传与HDR环境光设置 - 专业级3D模型查看体验</p>
         </header>
         
         <div class="main-content">
@@ -390,7 +529,7 @@
                 <h2 class="section-title">控制面板</h2>
                 
                 <div class="control-group">
-                    <h3>相机控制</h3>
+                    <h3><i>📷</i> 相机控制</h3>
                     <div class="slider-container">
                         <label>X轴旋转: <span class="value-display" id="rotation-x-value">0°</span></label>
                         <input type="range" id="rotation-x" min="-180" max="180" value="0">
@@ -406,7 +545,7 @@
                 </div>
                 
                 <div class="control-group">
-                    <h3>灯光控制</h3>
+                    <h3><i>💡</i> 灯光控制</h3>
                     <div class="slider-container">
                         <label>灯光强度: <span class="value-display" id="light-intensity-value">1.0</span></label>
                         <input type="range" id="light-intensity" min="0" max="2" step="0.1" value="1">
@@ -419,7 +558,42 @@
                 </div>
                 
                 <div class="control-group">
-                    <h3>模型操作</h3>
+                    <h3><i>✨</i> HDR环境光</h3>
+                    <p>上传HDR文件作为环境光源（不会显示在背景中）</p>
+                    
+                    <div class="upload-container">
+                        <div class="upload-btn-wrapper">
+                            <div class="upload-btn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11 15H13V9H16L12 4L8 9H11V15Z" fill="white"/>
+                                    <path d="M20 18H4V11H2V18C2 19.103 2.897 20 4 20H20C21.103 20 22 19.103 22 18V11H20V18Z" fill="white"/>
+                                </svg>
+                                选择HDR文件
+                            </div>
+                            <input type="file" id="hdr-upload" accept=".hdr">
+                        </div>
+                        <div id="hdr-file-name" class="file-name"></div>
+                        
+                        <div class="hdr-preview" id="hdr-preview">
+                            <div style="display:flex;height:100%;align-items:center;justify-content:center;color:#666;">
+                                上传HDR后将显示预览
+                            </div>
+                        </div>
+                        
+                        <div class="env-intensity">
+                            <label>环境光强度: <span class="value-display" id="env-intensity-value">1.0</span></label>
+                            <input type="range" id="env-intensity" min="0" max="2" step="0.1" value="1">
+                        </div>
+                        
+                        <div class="hdr-controls">
+                            <button class="btn" id="apply-hdr">应用HDR</button>
+                            <button class="btn" id="remove-hdr">移除HDR</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3><i>🔄</i> 模型操作</h3>
                     <button class="btn" id="reset-model">重置模型</button>
                     <button class="btn" id="toggle-animation">切换动画</button>
                     <button class="btn" id="change-model">更换预置模型</button>
@@ -443,10 +617,11 @@
                 <div class="info-panel">
                     <h3>模型信息</h3>
                     <div class="model-info">
-                        <p><strong>当前模型:</strong> <span id="model-name">Damaged Helmet</span></p>
+                        <p><strong>当前模型:</strong> <span id="model-name">损坏头盔</span></p>
                         <p><strong>模型类型:</strong> <span id="model-type">预置模型</span></p>
                         <p><strong>文件大小:</strong> <span id="model-size">1.2 MB</span></p>
                         <p><strong>顶点数量:</strong> <span id="vertex-count">加载中...</span></p>
+                        <p><strong>环境光:</strong> <span id="env-info">默认环境光</span></p>
                     </div>
                 </div>
             </div>
@@ -455,8 +630,9 @@
         <div class="instructions">
             <h3>使用说明</h3>
             <ul>
-                <li>使用右侧控制面板调整模型视角、灯光和动画效果</li>
+                <li>使用右侧控制面板调整模型视角、灯光和环境光效果</li>
                 <li>点击"上传本地GLB模型"按钮选择本地的GLB格式3D模型文件</li>
+                <li>上传HDR文件作为环境光源，不会显示在背景中</li>
                 <li>支持拖动模型进行旋转，滚轮进行缩放</li>
                 <li>预置模型包括头盔、机器人等示例模型</li>
                 <li>模型加载后，可调整灯光、旋转模型等参数</li>
@@ -465,15 +641,16 @@
         </div>
         
         <footer>
-            Three.js GLB模型加载器 | 支持本地文件上传 | 交互式3D模型查看体验 | 基于WebGL技术
+            Three.js GLB模型加载器 | 支持HDR环境光 | 专业级3D渲染 | 基于WebGL技术
         </footer>
     </div>
 
     <script>
         // 主要变量
-        let scene, camera, renderer, model, mixer, clock;
-        let directionalLight, ambientLight;
+        let scene, camera, renderer, model, mixer, clock, controls;
+        let directionalLight, ambientLight, envLight;
         let currentModel = 'DamagedHelmet';
+        let currentHDR = null;
         const models = {
             'DamagedHelmet': {
                 path: 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.glb',
@@ -512,12 +689,22 @@
             camera.position.set(0, 0.5, 5);
             
             // 创建渲染器
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: true
+            });
             renderer.setSize(document.querySelector('.canvas-section').offsetWidth, 
                             document.querySelector('.canvas-section').offsetHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // 添加轨道控制器
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
             
             // 添加灯光
             ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
@@ -527,6 +714,10 @@
             directionalLight.position.set(2, 5, 3);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
+            
+            // 添加环境光
+            envLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(envLight);
             
             // 添加辅助工具
             const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
@@ -558,6 +749,7 @@
             loadingOverlay.style.display = 'flex';
             progressBar.style.width = '0%';
             fileNameDisplay.textContent = `正在加载: ${modelName}`;
+            fileNameDisplay.style.color = '#4a9dfc';
             
             // 清除现有模型
             if (model) {
@@ -616,6 +808,12 @@
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            
+                            // 应用环境贴图
+                            if (currentHDR) {
+                                child.material.envMap = currentHDR;
+                                child.material.needsUpdate = true;
+                            }
                         }
                     });
                     
@@ -657,6 +855,121 @@
             );
         }
         
+        // 加载HDR环境贴图
+        function loadHDREnvironment(file) {
+            const reader = new FileReader();
+            const fileNameDisplay = document.getElementById('hdr-file-name');
+            const hdrPreview = document.getElementById('hdr-preview');
+            
+            fileNameDisplay.textContent = `已选择: ${file.name}`;
+            fileNameDisplay.style.color = '#4a9dfc';
+            
+            // 显示临时预览
+            hdrPreview.innerHTML = `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#666;">
+                HDR文件加载中...
+            </div>`;
+            
+            reader.onload = function(event) {
+                const hdrData = event.target.result;
+                
+                // 使用RGBELoader解析HDR
+                const loader = new THREE.RGBELoader();
+                loader.load(hdrData, function(texture) {
+                    texture.mapping = THREE.EquirectangularReflectionMapping;
+                    
+                    // 更新环境贴图
+                    if (currentHDR) {
+                        scene.environment.dispose();
+                    }
+                    
+                    scene.environment = texture;
+                    currentHDR = texture;
+                    
+                    // 更新模型材质的环境贴图
+                    if (model) {
+                        model.traverse(function(child) {
+                            if (child.isMesh && child.material) {
+                                child.material.envMap = texture;
+                                child.material.needsUpdate = true;
+                            }
+                        });
+                    }
+                    
+                    // 创建预览图像
+                    createHDRPreview(texture, hdrPreview);
+                    
+                    // 更新环境信息
+                    document.getElementById('env-info').textContent = file.name;
+                    document.getElementById('env-info').style.color = '#4a9dfc';
+                    
+                    // 应用当前环境光强度
+                    updateEnvIntensity();
+                }, undefined, function(error) {
+                    console.error('HDR加载错误:', error);
+                    fileNameDisplay.textContent = `HDR加载失败: ${error.message}`;
+                    fileNameDisplay.style.color = '#ff6b6b';
+                    
+                    hdrPreview.innerHTML = `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#ff6b6b;">
+                        HDR加载失败
+                    </div>`;
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // 创建HDR预览
+        function createHDRPreview(texture, container) {
+            // 创建临时canvas渲染预览
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 200;
+            
+            // 创建临时场景渲染HDR
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
+            camera.position.z = 1.5;
+            
+            const geometry = new THREE.SphereGeometry(1, 64, 32);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.BackSide
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+            
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                alpha: true,
+                preserveDrawingBuffer: true
+            });
+            renderer.setSize(canvas.width, canvas.height);
+            renderer.render(scene, camera);
+            
+            // 创建预览图像
+            const img = new Image();
+            img.src = canvas.toDataURL();
+            img.onload = function() {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+        }
+        
+        // 更新环境光强度
+        function updateEnvIntensity() {
+            const intensity = parseFloat(document.getElementById('env-intensity').value);
+            document.getElementById('env-intensity-value').textContent = intensity.toFixed(1);
+            
+            if (scene.environment) {
+                // 调整环境贴图强度
+                renderer.toneMappingExposure = intensity;
+            }
+            
+            // 调整环境光强度
+            envLight.intensity = intensity * 0.5;
+        }
+        
         // 设置事件监听器
         function setupEventListeners() {
             // 旋转控制
@@ -689,6 +1002,9 @@
             document.getElementById('light-color').addEventListener('input', function(e) {
                 directionalLight.color = new THREE.Color(e.target.value);
             });
+            
+            // 环境光强度控制
+            document.getElementById('env-intensity').addEventListener('input', updateEnvIntensity);
             
             // 阴影切换
             document.getElementById('toggle-shadows').addEventListener('click', function() {
@@ -779,6 +1095,78 @@
                 }, 1000);
             });
             
+            // HDR文件上传处理
+            document.getElementById('hdr-upload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 检查文件扩展名
+                if (!file.name.toLowerCase().endsWith('.hdr')) {
+                    alert('请选择HDR格式的文件！');
+                    return;
+                }
+                
+                // 加载HDR环境贴图
+                loadHDREnvironment(file);
+            });
+            
+            // 应用HDR按钮
+            document.getElementById('apply-hdr').addEventListener('click', function() {
+                if (!currentHDR) {
+                    alert('请先上传HDR文件！');
+                    return;
+                }
+                
+                // 确保环境贴图已应用
+                scene.environment = currentHDR;
+                
+                // 更新模型材质的环境贴图
+                if (model) {
+                    model.traverse(function(child) {
+                        if (child.isMesh && child.material) {
+                            child.material.envMap = currentHDR;
+                            child.material.needsUpdate = true;
+                        }
+                    });
+                }
+                
+                updateEnvIntensity();
+                alert('HDR环境光已应用！');
+            });
+            
+            // 移除HDR按钮
+            document.getElementById('remove-hdr').addEventListener('click', function() {
+                if (scene.environment) {
+                    scene.environment.dispose();
+                    scene.environment = null;
+                    currentHDR = null;
+                    
+                    // 更新模型材质的环境贴图
+                    if (model) {
+                        model.traverse(function(child) {
+                            if (child.isMesh && child.material) {
+                                child.material.envMap = null;
+                                child.material.needsUpdate = true;
+                            }
+                        });
+                    }
+                    
+                    // 重置预览
+                    document.getElementById('hdr-preview').innerHTML = 
+                        `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#666;">
+                            上传HDR后将显示预览
+                        </div>`;
+                    
+                    document.getElementById('hdr-file-name').textContent = '';
+                    document.getElementById('env-info').textContent = '默认环境光';
+                    document.getElementById('env-info').style.color = '';
+                    
+                    alert('HDR环境光已移除！');
+                } else {
+                    alert('当前没有应用HDR环境光！');
+                }
+            });
+            
             // 添加鼠标控制
             let isDragging = false;
             let previousMousePosition = {
@@ -853,6 +1241,9 @@
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
+            
+            // 更新控制器
+            if (controls) controls.update();
             
             // 更新动画混合器
             if (mixer) {
