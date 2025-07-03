@@ -106,7 +106,7 @@ function initApp(THREE, Stats, OrbitControls) {
         const loader = new THREE.OBJLoader();
         
         // 使用一个可靠的模型URL
-        const modelUrl = '4.obj';
+        const modelUrl = 'Bottle - Wine.obj';
         
         loader.load(
             modelUrl,
