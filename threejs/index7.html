@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js GLB模型加载器</title>
+    <title>Three.js GLB模型加载器 - 支持文件上传</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <style>
@@ -11,68 +11,98 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            overflow: hidden;
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            padding: 20px;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            z-index: 10;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #ff8a00, #e52e71);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         
         .container {
-            flex: 1;
-            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .main-content {
             display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .canvas-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            height: 70vh;
         }
         
         #canvas-container {
-            flex: 1;
+            width: 100%;
+            height: 100%;
         }
         
-        .control-panel {
-            width: 300px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        .control-section {
+            flex: 0 0 320px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff8a00;
+            color: #ff8a00;
         }
         
         .control-group {
             margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(30, 30, 50, 0.5);
+            border-radius: 15px;
         }
         
-        h2 {
+        .control-group h3 {
             font-size: 1.4rem;
             margin-bottom: 15px;
-            color: #ff8a00;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 5px;
+            color: #e52e71;
         }
         
         .slider-container {
@@ -81,14 +111,15 @@
         
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: #aaa;
         }
         
         input[type="range"] {
             width: 100%;
-            height: 10px;
-            border-radius: 5px;
+            height: 12px;
+            border-radius: 6px;
             background: #333;
             outline: none;
             -webkit-appearance: none;
@@ -96,39 +127,113 @@
         
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: #ff8a00;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 138, 0, 0.7);
         }
         
-        button {
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            display: inline-block;
+            min-width: 50px;
+            text-align: right;
+            color: #ff8a00;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
             background: linear-gradient(45deg, #ff8a00, #e52e71);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            margin: 10px 0;
-            width: 100%;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
-        button:hover {
+        .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
         
-        .info-panel {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 15px;
-            border-radius: 10px;
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .upload-container {
+            background: rgba(30, 40, 70, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
             margin-top: 20px;
-            font-size: 0.9rem;
-            line-height: 1.6;
+            border: 2px dashed #4a6fc5;
+        }
+        
+        .upload-container h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #4a9dfc;
+        }
+        
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #4a6fc5, #4a9dfc);
+            color: white;
+            padding: 14px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .upload-btn:hover {
+            background: linear-gradient(45deg, #4a9dfc, #4a6fc5);
+        }
+        
+        .upload-btn-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .info-panel {
+            background: rgba(30, 30, 50, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            line-height: 1.7;
         }
         
         .model-info {
@@ -137,12 +242,12 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .footer {
-            text-align: center;
-            padding: 15px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #aaa;
-            font-size: 0.9rem;
+        .model-info p {
+            margin: 8px 0;
+        }
+        
+        .model-info strong {
+            color: #ff8a00;
         }
         
         .loading-overlay {
@@ -151,7 +256,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -179,14 +284,15 @@
             font-size: 1.5rem;
             color: white;
             text-align: center;
+            margin-bottom: 20px;
         }
         
         .progress-bar {
-            width: 300px;
-            height: 6px;
+            width: 70%;
+            max-width: 400px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            margin-top: 20px;
-            border-radius: 3px;
+            border-radius: 4px;
             overflow: hidden;
         }
         
@@ -196,76 +302,171 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+        
+        .file-name {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #aaa;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #aaa;
+        }
+        
+        .instructions {
+            background: rgba(30, 40, 70, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border-left: 4px solid #4a9dfc;
+        }
+        
+        .instructions h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #4a9dfc;
+        }
+        
+        .instructions ul {
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .canvas-section {
+                height: 50vh;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Three.js GLB Model加载器</h1>
-        <p class="subtitle">使用GLTFLoader加载并操作3D模型</p>
-    </div>
-    
     <div class="container">
-        <div id="canvas-container"></div>
+        <header>
+            <h1>Three.js GLB模型加载器</h1>
+            <p class="subtitle">支持本地GLB文件上传与实时交互操作 - 使用GLTFLoader加载并操作3D模型</p>
+        </header>
         
-        <div class="control-panel">
-            <div class="control-group">
-                <h2>相机控制</h2>
-                <div class="slider-container">
-                    <label for="rotation-x">X轴旋转: <span id="rotation-x-value">0°</span></label>
-                    <input type="range" id="rotation-x" min="-180" max="180" value="0">
-                </div>
-                <div class="slider-container">
-                    <label for="rotation-y">Y轴旋转: <span id="rotation-y-value">0°</span></label>
-                    <input type="range" id="rotation-y" min="-180" max="180" value="0">
-                </div>
-                <div class="slider-container">
-                    <label for="zoom">缩放: <span id="zoom-value">1.0</span></label>
-                    <input type="range" id="zoom" min="0.1" max="2" step="0.01" value="1">
+        <div class="main-content">
+            <div class="canvas-section">
+                <div id="canvas-container"></div>
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="loader"></div>
+                    <div class="loading-text">加载模型中...</div>
+                    <div class="progress-bar">
+                        <div class="progress" id="loading-progress"></div>
+                    </div>
+                    <div id="file-name" class="file-name"></div>
                 </div>
             </div>
             
-            <div class="control-group">
-                <h2>灯光控制</h2>
-                <div class="slider-container">
-                    <label for="light-intensity">灯光强度: <span id="light-intensity-value">1.0</span></label>
-                    <input type="range" id="light-intensity" min="0" max="2" step="0.1" value="1">
+            <div class="control-section">
+                <h2 class="section-title">控制面板</h2>
+                
+                <div class="control-group">
+                    <h3>相机控制</h3>
+                    <div class="slider-container">
+                        <label>X轴旋转: <span class="value-display" id="rotation-x-value">0°</span></label>
+                        <input type="range" id="rotation-x" min="-180" max="180" value="0">
+                    </div>
+                    <div class="slider-container">
+                        <label>Y轴旋转: <span class="value-display" id="rotation-y-value">0°</span></label>
+                        <input type="range" id="rotation-y" min="-180" max="180" value="0">
+                    </div>
+                    <div class="slider-container">
+                        <label>缩放: <span class="value-display" id="zoom-value">1.0</span></label>
+                        <input type="range" id="zoom" min="0.1" max="2" step="0.01" value="1">
+                    </div>
                 </div>
-                <div class="slider-container">
-                    <label for="light-color">灯光颜色</label>
-                    <input type="color" id="light-color" value="#ffffff">
+                
+                <div class="control-group">
+                    <h3>灯光控制</h3>
+                    <div class="slider-container">
+                        <label>灯光强度: <span class="value-display" id="light-intensity-value">1.0</span></label>
+                        <input type="range" id="light-intensity" min="0" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="slider-container">
+                        <label>灯光颜色</label>
+                        <input type="color" id="light-color" value="#ffffff">
+                    </div>
+                    <button class="btn" id="toggle-shadows">切换阴影</button>
                 </div>
-                <button id="toggle-shadows">切换阴影</button>
-            </div>
-            
-            <div class="control-group">
-                <h2>模型操作</h2>
-                <button id="reset-model">重置模型</button>
-                <button id="toggle-animation">切换动画</button>
-                <button id="change-model">更换模型</button>
-            </div>
-            
-            <div class="info-panel">
-                <h2>技术信息</h2>
-                <p>Three.js的GLTFLoader用于加载GLB格式的3D模型。GLB是glTF格式的二进制版本，专为Web传输优化。</p>
-                <div class="model-info">
-                    <p><strong>当前模型:</strong> <span id="model-name">Damaged Helmet</span></p>
-                    <p><strong>模型大小:</strong> <span id="model-size">1.2 MB</span></p>
-                    <p><strong>顶点数:</strong> <span id="vertex-count">Loading...</span></p>
+                
+                <div class="control-group">
+                    <h3>模型操作</h3>
+                    <button class="btn" id="reset-model">重置模型</button>
+                    <button class="btn" id="toggle-animation">切换动画</button>
+                    <button class="btn" id="change-model">更换预置模型</button>
+                </div>
+                
+                <div class="upload-container">
+                    <h3>上传本地GLB模型</h3>
+                    <div class="upload-btn-wrapper">
+                        <div class="upload-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11 15H13V9H16L12 4L8 9H11V15Z" fill="white"/>
+                                <path d="M20 18H4V11H2V18C2 19.103 2.897 20 4 20H20C21.103 20 22 19.103 22 18V11H20V18Z" fill="white"/>
+                            </svg>
+                            选择GLB文件
+                        </div>
+                        <input type="file" id="model-upload" accept=".glb">
+                    </div>
+                    <div id="upload-file-name" class="file-name"></div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>模型信息</h3>
+                    <div class="model-info">
+                        <p><strong>当前模型:</strong> <span id="model-name">Damaged Helmet</span></p>
+                        <p><strong>模型类型:</strong> <span id="model-type">预置模型</span></p>
+                        <p><strong>文件大小:</strong> <span id="model-size">1.2 MB</span></p>
+                        <p><strong>顶点数量:</strong> <span id="vertex-count">加载中...</span></p>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="loading-overlay" id="loading-overlay">
-            <div class="loader"></div>
-            <div class="loading-text">加载模型中...</div>
-            <div class="progress-bar">
-                <div class="progress" id="loading-progress"></div>
-            </div>
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>使用右侧控制面板调整模型视角、灯光和动画效果</li>
+                <li>点击"上传本地GLB模型"按钮选择本地的GLB格式3D模型文件</li>
+                <li>支持拖动模型进行旋转，滚轮进行缩放</li>
+                <li>预置模型包括头盔、机器人等示例模型</li>
+                <li>模型加载后，可调整灯光、旋转模型等参数</li>
+            </ul>
+            <p><strong>注意：</strong>大型模型文件可能需要较长时间加载，请耐心等待</p>
         </div>
-    </div>
-    
-    <div class="footer">
-        Three.js GLB模型加载演示 | GLB是Web上3D内容的理想格式 | 支持动画、材质和光照
+        
+        <footer>
+            Three.js GLB模型加载器 | 支持本地文件上传 | 交互式3D模型查看体验 | 基于WebGL技术
+        </footer>
     </div>
 
     <script>
@@ -277,17 +478,20 @@
             'DamagedHelmet': {
                 path: 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.glb',
                 size: '1.2 MB',
-                scale: 1.0
+                scale: 1.0,
+                name: '损坏头盔'
             },
             'FlightHelmet': {
                 path: 'https://threejs.org/examples/models/gltf/FlightHelmet/glTF/FlightHelmet.glb',
                 size: '5.4 MB',
-                scale: 1.5
+                scale: 1.5,
+                name: '飞行头盔'
             },
             'RobotExpressive': {
                 path: 'https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb',
                 size: '1.8 MB',
-                scale: 0.8
+                scale: 0.8,
+                name: '表情机器人'
             }
         };
 
@@ -301,7 +505,7 @@
             // 创建相机
             camera = new THREE.PerspectiveCamera(
                 45, 
-                window.innerWidth / (window.innerHeight - 150), 
+                (window.innerWidth - 350) / (window.innerHeight - 150), 
                 0.1, 
                 1000
             );
@@ -309,7 +513,8 @@
             
             // 创建渲染器
             renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth - 300, window.innerHeight - 150);
+            renderer.setSize(document.querySelector('.canvas-section').offsetWidth, 
+                            document.querySelector('.canvas-section').offsetHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
@@ -334,7 +539,7 @@
             clock = new THREE.Clock();
             
             // 加载初始模型
-            loadModel(models[currentModel].path);
+            loadModel(models[currentModel].path, models[currentModel].name);
             
             // 添加事件监听器
             setupEventListeners();
@@ -344,12 +549,15 @@
         }
         
         // 加载GLB模型
-        function loadModel(url) {
+        function loadModel(url, modelName = "自定义模型", fileSize = "计算中...") {
             // 显示加载界面
             const loadingOverlay = document.getElementById('loading-overlay');
             const progressBar = document.getElementById('loading-progress');
+            const fileNameDisplay = document.getElementById('file-name');
+            
             loadingOverlay.style.display = 'flex';
             progressBar.style.width = '0%';
+            fileNameDisplay.textContent = `正在加载: ${modelName}`;
             
             // 清除现有模型
             if (model) {
@@ -367,21 +575,41 @@
                     model = gltf.scene;
                     
                     // 更新模型信息
-                    document.getElementById('model-name').textContent = currentModel;
-                    document.getElementById('model-size').textContent = models[currentModel].size;
+                    document.getElementById('model-name').textContent = modelName;
+                    document.getElementById('model-type').textContent = 
+                        url.startsWith('blob:') ? '上传模型' : '预置模型';
+                    document.getElementById('model-size').textContent = fileSize;
                     
                     // 计算顶点数
                     let vertexCount = 0;
+                    let triangleCount = 0;
                     model.traverse(function (child) {
                         if (child.isMesh) {
                             vertexCount += child.geometry.attributes.position.count;
+                            if (child.geometry.index) {
+                                triangleCount += child.geometry.index.count / 3;
+                            } else {
+                                triangleCount += child.geometry.attributes.position.count / 3;
+                            }
                         }
                     });
-                    document.getElementById('vertex-count').textContent = vertexCount.toLocaleString();
+                    document.getElementById('vertex-count').textContent = 
+                        `${vertexCount.toLocaleString()} (${triangleCount.toLocaleString()} 个三角面)`;
                     
                     // 设置模型位置和缩放
                     model.position.set(0, -0.5, 0);
-                    model.scale.set(models[currentModel].scale, models[currentModel].scale, models[currentModel].scale);
+                    
+                    // 根据模型类型设置缩放
+                    let modelScale = 1.0;
+                    if (models[currentModel]) {
+                        modelScale = models[currentModel].scale;
+                    } else {
+                        // 对于上传的模型，自动调整缩放
+                        const box = new THREE.Box3().setFromObject(model);
+                        const size = box.getSize(new THREE.Vector3()).length();
+                        modelScale = 2.5 / size;
+                    }
+                    model.scale.set(modelScale, modelScale, modelScale);
                     
                     // 设置模型可投射和接收阴影
                     model.traverse(function (child) {
@@ -398,6 +626,9 @@
                         mixer = new THREE.AnimationMixer(model);
                         const action = mixer.clipAction(gltf.animations[0]);
                         action.play();
+                        document.getElementById('toggle-animation').style.display = 'block';
+                    } else {
+                        document.getElementById('toggle-animation').style.display = 'none';
                     }
                     
                     // 隐藏加载界面
@@ -413,7 +644,15 @@
                 function (error) {
                     console.error('模型加载出错:', error);
                     loadingOverlay.style.display = 'none';
-                    alert('模型加载失败，请检查控制台获取详细信息');
+                    
+                    // 显示错误信息
+                    fileNameDisplay.textContent = `加载失败: ${error.message}`;
+                    fileNameDisplay.style.color = '#ff6b6b';
+                    
+                    setTimeout(() => {
+                        fileNameDisplay.textContent = '';
+                        fileNameDisplay.style.color = '';
+                    }, 3000);
                 }
             );
         }
@@ -486,20 +725,128 @@
                 }
             });
             
-            // 更换模型
+            // 更换预置模型
             document.getElementById('change-model').addEventListener('click', function() {
                 const modelKeys = Object.keys(models);
                 const currentIndex = modelKeys.indexOf(currentModel);
                 const nextIndex = (currentIndex + 1) % modelKeys.length;
                 currentModel = modelKeys[nextIndex];
-                loadModel(models[currentModel].path);
+                loadModel(models[currentModel].path, models[currentModel].name, models[currentModel].size);
             });
             
             // 窗口大小调整
             window.addEventListener('resize', function() {
-                camera.aspect = (window.innerWidth - 300) / (window.innerHeight - 150);
+                const canvasSection = document.querySelector('.canvas-section');
+                const width = canvasSection.offsetWidth;
+                const height = canvasSection.offsetHeight;
+                
+                camera.aspect = width / height;
                 camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth - 300, window.innerHeight - 150);
+                renderer.setSize(width, height);
+            });
+            
+            // 模型文件上传处理
+            document.getElementById('model-upload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 检查文件扩展名
+                if (!file.name.toLowerCase().endsWith('.glb')) {
+                    alert('请选择GLB格式的文件！');
+                    return;
+                }
+                
+                // 显示文件名
+                const fileNameDisplay = document.getElementById('upload-file-name');
+                fileNameDisplay.textContent = `已选择: ${file.name}`;
+                fileNameDisplay.style.color = '#4a9dfc';
+                
+                // 显示文件大小
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                
+                // 创建文件URL
+                const url = URL.createObjectURL(file);
+                
+                // 更新当前模型名称
+                currentModel = 'custom';
+                
+                // 加载模型
+                loadModel(url, file.name, fileSize);
+                
+                // 清理URL对象
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 1000);
+            });
+            
+            // 添加鼠标控制
+            let isDragging = false;
+            let previousMousePosition = {
+                x: 0,
+                y: 0
+            };
+            
+            // 鼠标按下事件
+            renderer.domElement.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+            
+            // 鼠标移动事件
+            renderer.domElement.addEventListener('mousemove', function(e) {
+                if (!isDragging || !model) return;
+                
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+                
+                model.rotation.y += deltaMove.x * 0.01;
+                model.rotation.x += deltaMove.y * 0.01;
+                
+                // 更新滑块值
+                document.getElementById('rotation-x').value = THREE.MathUtils.radToDeg(model.rotation.x);
+                document.getElementById('rotation-y').value = THREE.MathUtils.radToDeg(model.rotation.y);
+                document.getElementById('rotation-x-value').textContent = 
+                    `${Math.round(THREE.MathUtils.radToDeg(model.rotation.x))}°`;
+                document.getElementById('rotation-y-value').textContent = 
+                    `${Math.round(THREE.MathUtils.radToDeg(model.rotation.y))}°`;
+                
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+            
+            // 鼠标释放事件
+            renderer.domElement.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            renderer.domElement.addEventListener('mouseleave', function() {
+                isDragging = false;
+            });
+            
+            // 鼠标滚轮缩放
+            renderer.domElement.addEventListener('wheel', function(e) {
+                if (!model) return;
+                
+                e.preventDefault();
+                
+                // 计算新的缩放值
+                let zoomValue = parseFloat(document.getElementById('zoom').value);
+                zoomValue += e.deltaY * -0.001;
+                
+                // 限制缩放范围
+                zoomValue = Math.min(Math.max(zoomValue, 0.1), 2);
+                
+                // 更新缩放值
+                document.getElementById('zoom').value = zoomValue;
+                document.getElementById('zoom-value').textContent = zoomValue.toFixed(2);
+                camera.position.z = 5 / zoomValue;
             });
         }
         
