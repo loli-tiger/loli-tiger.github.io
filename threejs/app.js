@@ -5,6 +5,7 @@ function initApp(THREE, Stats, OrbitControls) {
     const resetBtn = document.getElementById('reset-btn');
     const statsContainer = document.getElementById('stats-container');
     const statusText = document.getElementById('status-text');
+
     
     // 显示错误函数
     function showError(message) {
@@ -100,13 +101,14 @@ function initApp(THREE, Stats, OrbitControls) {
 
     // 声明变量存储加载的模型对象
     let externalModel = null;
+    let gltfModel = null; // 新增：存储GLTF模型
     
     try {
         // 创建OBJ加载器 - 现在应该已可用
         const loader = new THREE.OBJLoader();
         
         // 使用一个可靠的模型URL
-        const modelUrl = '5.obj';
+        const modelUrl = '4.obj';
         
         loader.load(
             modelUrl,
@@ -155,6 +157,59 @@ function initApp(THREE, Stats, OrbitControls) {
     } catch (e) {
         showError("创建OBJLoader失败: " + e.message);
         statusText.textContent = "创建加载器失败";
+    }
+
+        // 新增：加载GLTF模型
+    statusText.textContent = "加载GLTF模型...";
+    try {
+        if (typeof THREE.GLTFLoader === 'function') {
+            const gltfLoader = new THREE.GLTFLoader();
+            
+            // 使用一个可靠的GLTF模型URL
+            const gltfModelUrl = 'espresso.gltf';
+            
+            gltfLoader.load(
+                gltfModelUrl,
+                (gltf) => {
+                    const model = gltf.scene;
+                    
+                    // 应用材质到模型所有部分
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material = new THREE.MeshPhongMaterial({
+                                color: 0x9c27b0, // 紫色
+                                shininess: 80,
+                                specular: 0xffffff
+                            });
+                        }
+                    });
+                    
+                    // 调整模型位置和大小
+                    model.position.set(-5, 1, 0);
+                    model.scale.set(1.2, 1.2, 1.2);
+                    scene.add(model);
+                    
+                    // 保存模型引用
+                    gltfModel = model;
+                    statusText.textContent = "GLTF模型加载完成!";
+                    console.log("GLTF模型加载成功:", model);
+                },
+                (xhr) => {
+                    const percent = Math.round(xhr.loaded / xhr.total * 100);
+                    statusText.textContent = `加载GLTF模型: ${percent}%`;
+                },
+                (error) => {
+                    statusText.textContent = "GLTF模型加载失败";
+                    showError("GLTF模型加载失败: " + error.message);
+                    console.error('GLTF模型加载错误:', error);
+                }
+            );
+        } else {
+            throw new Error("GLTFLoader未可用");
+        }
+    } catch (e) {
+        showError("创建GLTFLoader失败: " + e.message);
+        statusText.textContent = "创建GLTF加载器失败";
     }
     
     // 7. 添加FPS计数器
@@ -220,6 +275,13 @@ function initApp(THREE, Stats, OrbitControls) {
                 externalModel.rotation.z = time * 0.3;
                 externalModel.position.x = Math.sin(time * 0.8) * 3;
                 externalModel.position.y = Math.cos(time * 1.2) * 0.5;
+            }
+
+             // 新增：GLTF模型动画
+           if (gltfModel) {
+                gltfModel.rotation.y = time * 0.5;
+                gltfModel.position.y = Math.sin(time * 1.2) * 0.3 + 1;
+                gltfModel.position.z = Math.cos(time * 0.7) * 1.5;
             }
             
             controls.update();
