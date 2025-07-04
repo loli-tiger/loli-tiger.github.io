@@ -80,6 +80,12 @@ function initApp(THREE, Stats, OrbitControls) {
     ground.receiveShadow = true; // 接收阴影
     scene.add(ground);
     
+    // 移除原始网格地面和坐标轴
+    // const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+    // scene.add(gridHelper);
+    // const axesHelper = new THREE.AxesHelper(5);
+    // scene.add(axesHelper);
+    
     // 创建立方体
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
     const cubeMaterial = new THREE.MeshPhongMaterial({
@@ -162,67 +168,21 @@ function initApp(THREE, Stats, OrbitControls) {
     // 创建预览容器
     const previewContainer = document.createElement('div');
     previewContainer.style.width = '100%';
+    previewContainer.style.height = '100px';
     previewContainer.style.marginTop = '10px';
-    previewContainer.style.padding = '5px';
     previewContainer.style.backgroundColor = '#f0f0f0';
     previewContainer.style.borderRadius = '4px';
-    
-    // 文件名显示
-    const fileNameDisplay = document.createElement('div');
-    fileNameDisplay.id = 'hdr-filename';
-    fileNameDisplay.style.fontSize = '12px';
-    fileNameDisplay.style.color = '#666';
-    fileNameDisplay.style.marginBottom = '5px';
-    fileNameDisplay.textContent = '当前HDR: 默认环境贴图';
-    
-    // 预览区域
-    const previewArea = document.createElement('div');
-    previewArea.style.width = '100%';
-    previewArea.style.height = '100px';
-    previewArea.style.display = 'flex';
-    previewArea.style.justifyContent = 'center';
-    previewArea.style.alignItems = 'center';
-    previewArea.style.backgroundColor = '#ddd';
-    previewArea.style.borderRadius = '4px';
+    previewContainer.style.overflow = 'hidden';
+    previewContainer.style.display = 'flex';
+    previewContainer.style.justifyContent = 'center';
+    previewContainer.style.alignItems = 'center';
     
     const previewText = document.createElement('div');
     previewText.textContent = 'HDR预览';
-    previewText.style.color = '#888';
-    previewArea.appendChild(previewText);
+    previewText.style.color = '#666';
+    previewContainer.appendChild(previewText);
     
-    previewContainer.appendChild(fileNameDisplay);
-    previewContainer.appendChild(previewArea);
     hdrFolder.__ul.appendChild(previewContainer);
-    
-    // HDR预览功能
-    function updateHDRPreview(texture) {
-        // 创建canvas绘制预览
-        const canvas = document.createElement('canvas');
-        canvas.width = 200;
-        canvas.height = 100;
-        const ctx = canvas.getContext('2d');
-        
-        // 创建临时图像
-        const image = new Image();
-        image.onload = function() {
-            // 清除预览区域
-            while (previewArea.firstChild) {
-                previewArea.removeChild(previewArea.firstChild);
-            }
-            
-            // 创建预览图像
-            const hdrPreview = new Image();
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            hdrPreview.src = canvas.toDataURL('image/jpeg');
-            hdrPreview.style.width = '100%';
-            hdrPreview.style.height = '100%';
-            hdrPreview.style.objectFit = 'cover';
-            previewArea.appendChild(hdrPreview);
-        };
-        
-        // 使用默认图像作为预览
-        image.src = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/equirectangular/venice_sunset_1k.hdr';
-    }
     
     hdrFolder.add({
         uploadHDR: function() {
@@ -248,11 +208,25 @@ function initApp(THREE, Stats, OrbitControls) {
                                     const envMap = pmremGenerator.fromEquirectangular(texture).texture;
                                     scene.environment = envMap;
                                     
-                                    // 更新文件名显示
-                                    fileNameDisplay.textContent = `当前HDR: ${file.name}`;
+                                    // 创建预览
+                                    const canvas = document.createElement('canvas');
+                                    const ctx = canvas.getContext('2d');
+                                    canvas.width = 200;
+                                    canvas.height = 100;
                                     
-                                    // 更新预览
-                                    updateHDRPreview(texture);
+                                    // 创建临时图像用于预览
+                                    const image = new Image();
+                                    image.onload = function() {
+                                        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                                        previewContainer.removeChild(previewText);
+                                        const hdrPreview = new Image();
+                                        hdrPreview.src = canvas.toDataURL('image/jpeg');
+                                        hdrPreview.style.width = '100%';
+                                        hdrPreview.style.height = '100%';
+                                        hdrPreview.style.objectFit = 'cover';
+                                        previewContainer.appendChild(hdrPreview);
+                                    };
+                                    image.src = URL.createObjectURL(file);
                                     
                                     console.log("HDR环境贴图上传成功");
                                 },
@@ -272,19 +246,34 @@ function initApp(THREE, Stats, OrbitControls) {
     }, 'uploadHDR').name('上传HDR文件');
     
     // 加载初始HDR图像
-    const defaultHDRUrl = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr';
-    
     new THREE.RGBELoader()
         .setDataType(THREE.UnsignedByteType)
         .load(
-            defaultHDRUrl,
+            'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr',
             (texture) => {
                 currentHDRTexture = texture;
                 const envMap = pmremGenerator.fromEquirectangular(texture).texture;
                 scene.environment = envMap;
                 
-                // 更新预览
-                updateHDRPreview(texture);
+                // 创建预览
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 200;
+                canvas.height = 100;
+                
+                // 创建临时图像用于预览
+                const image = new Image();
+                image.onload = function() {
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    previewContainer.removeChild(previewText);
+                    const hdrPreview = new Image();
+                    hdrPreview.src = canvas.toDataURL('image/jpeg');
+                    hdrPreview.style.width = '100%';
+                    hdrPreview.style.height = '100%';
+                    hdrPreview.style.objectFit = 'cover';
+                    previewContainer.appendChild(hdrPreview);
+                };
+                image.src = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr';
                 
                 console.log("HDR环境贴图加载成功");
                 statusText.textContent = "HDR环境贴图加载成功";
