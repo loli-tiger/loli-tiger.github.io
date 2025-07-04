@@ -103,6 +103,52 @@ function initApp(THREE, Stats, OrbitControls) {
     let externalModel = null;
     let gltfModel = null; // 新增：存储GLTF模型
     
+    // 创建GUI控制器
+    const gui = new dat.GUI({ name: '模型控制面板', width: 300 });
+    gui.close(); // 默认折叠
+
+    // 添加GUI重置按钮
+    gui.add({
+        resetAll: function() {
+            if (externalModelFolder) externalModelFolder.revert();
+            if (gltfModelFolder) gltfModelFolder.revert();
+        }
+    }, 'resetAll').name('重置所有设置');
+    
+    let externalModelFolder, gltfModelFolder;
+    
+    // 创建HDR环境贴图
+    statusText.textContent = "加载HDR环境贴图...";
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    
+    // 加载HDR图像
+    new THREE.RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr',
+            (texture) => {
+                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.environment = envMap;
+                
+                // 释放内存
+                texture.dispose();
+                pmremGenerator.dispose();
+                
+                console.log("HDR环境贴图加载成功");
+                statusText.textContent = "HDR环境贴图加载成功";
+            },
+            (xhr) => {
+                const percent = Math.round(xhr.loaded / xhr.total * 100);
+                statusText.textContent = `加载HDR环境贴图: ${percent}%`;
+            },
+            (error) => {
+                statusText.textContent = "HDR环境贴图加载失败";
+                showError("HDR环境贴图加载失败: " + error.message);
+                console.error('HDR环境贴图加载错误:', error);
+            }
+        );
+    
     try {
         // 创建OBJ加载器 - 现在应该已可用
         const loader = new THREE.OBJLoader();
@@ -141,6 +187,23 @@ function initApp(THREE, Stats, OrbitControls) {
 
                  // 保存模型引用
                 externalModel = object;
+
+                 // 添加GUI控制
+                externalModelFolder = gui.addFolder('OBJ模型控制');
+                externalModelFolder.add(externalModel.position, 'x', -10, 10, 0.1).name('位置 X');
+                externalModelFolder.add(externalModel.position, 'y', -5, 10, 0.1).name('位置 Y');
+                externalModelFolder.add(externalModel.position, 'z', -10, 10, 0.1).name('位置 Z');
+                
+                externalModelFolder.add(externalModel.rotation, 'x', -Math.PI, Math.PI, 0.01).name('旋转 X');
+                externalModelFolder.add(externalModel.rotation, 'y', -Math.PI, Math.PI, 0.01).name('旋转 Y');
+                externalModelFolder.add(externalModel.rotation, 'z', -Math.PI, Math.PI, 0.01).name('旋转 Z');
+                
+                externalModelFolder.add(externalModel.scale, 'x', 0.1, 5, 0.1).name('缩放 X').onChange((v) => {
+                    externalModel.scale.y = v;
+                    externalModel.scale.z = v;
+                });
+                
+                externalModelFolder.open();
                 
                 console.log("模型加载成功:", object);
             },
@@ -192,6 +255,24 @@ function initApp(THREE, Stats, OrbitControls) {
                     // 保存模型引用
                     gltfModel = model;
                     statusText.textContent = "GLTF模型加载完成!";
+
+                    // 添加GUI控制
+                    gltfModelFolder = gui.addFolder('GLTF模型控制');
+                    gltfModelFolder.add(gltfModel.position, 'x', -10, 10, 0.1).name('位置 X');
+                    gltfModelFolder.add(gltfModel.position, 'y', -5, 10, 0.1).name('位置 Y');
+                    gltfModelFolder.add(gltfModel.position, 'z', -10, 10, 0.1).name('位置 Z');
+                    
+                    gltfModelFolder.add(gltfModel.rotation, 'x', -Math.PI, Math.PI, 0.01).name('旋转 X');
+                    gltfModelFolder.add(gltfModel.rotation, 'y', -Math.PI, Math.PI, 0.01).name('旋转 Y');
+                    gltfModelFolder.add(gltfModel.rotation, 'z', -Math.PI, Math.PI, 0.01).name('旋转 Z');
+                    
+                    gltfModelFolder.add(gltfModel.scale, 'x', 0.1, 5, 0.1).name('缩放 X').onChange((v) => {
+                        gltfModel.scale.y = v;
+                        gltfModel.scale.z = v;
+                    });
+                    
+                    gltfModelFolder.open();
+                    
                     console.log("GLTF模型加载成功:", model);
                 },
                 (xhr) => {
