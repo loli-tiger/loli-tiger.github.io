@@ -229,7 +229,7 @@ function initApp(THREE, Stats, OrbitControls) {
             const gltfLoader = new THREE.GLTFLoader();
             
             // 使用一个可靠的GLTF模型URL
-            const gltfModelUrl = 'espresso.gltf';
+            const gltfModelUrl = 'blender.gltf';
             
             gltfLoader.load(
                 gltfModelUrl,
