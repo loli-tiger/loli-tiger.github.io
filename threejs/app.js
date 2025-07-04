@@ -348,7 +348,7 @@ function initApp(THREE, Stats, OrbitControls) {
             torus.position.x = -3 + Math.cos(time * 0.8) * 2;
 
             
-            
+            /*
             if (externalModel) {
                  // 添加更多动画效果
                 externalModel.rotation.x = time * 0.6;
@@ -364,6 +364,26 @@ function initApp(THREE, Stats, OrbitControls) {
                 gltfModel.position.y = Math.sin(time * 1.2) * 0.3 + 1;
                 gltfModel.position.z = Math.cos(time * 0.7) * 1.5;
             }
+            */
+                   // 外部模型动画（如果GUI没有控制）
+        if (externalModel) {
+            if (!externalModelFolder || !externalModelFolder.__controllers.some(c => c.isListening())) {
+                externalModel.rotation.x = time * 0.6;
+                externalModel.rotation.y = time * 0.4;
+                externalModel.rotation.z = time * 0.3;
+                externalModel.position.x = Math.sin(time * 0.8) * 3;
+                externalModel.position.y = Math.cos(time * 1.2) * 0.5;
+            }
+        }
+        
+        // GLTF模型动画（如果GUI没有控制）
+        if (gltfModel) {
+            if (!gltfModelFolder || !gltfModelFolder.__controllers.some(c => c.isListening())) {
+                gltfModel.rotation.y = time * 0.5;
+                gltfModel.position.y = Math.sin(time * 1.2) * 0.3 + 1;
+                gltfModel.position.z = Math.cos(time * 0.7) * 1.5;
+            }
+        }
             
             controls.update();
             renderer.render(scene, camera);
