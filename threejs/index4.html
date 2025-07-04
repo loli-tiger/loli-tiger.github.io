@@ -139,8 +139,8 @@
             }
             
             let loadedDependencies = 0;
-            // 添加更多依赖项
-            const totalDependencies = 4; // THREE, Stats, OrbitControls, OBJLoader
+            // 更新依赖项总数（增加GLTFLoader）
+            const totalDependencies = 5; // THREE, Stats, OrbitControls, OBJLoader, GLTFLoader
             
             function checkDependency(name, checkFn) {
                 let checks = 0;
@@ -209,6 +209,26 @@
                 updateStatus("OBJLoader加载失败", 80);
             };
             document.body.appendChild(objLoaderScript);
+
+            // 新增：动态加载 GLTFLoader
+            updateStatus("加载GLTFLoader...", 70);
+            const gltfLoaderScript = document.createElement('script');
+            gltfLoaderScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+            gltfLoaderScript.onload = () => {
+                if (typeof THREE.GLTFLoader === 'function') {
+                    updateStatus("GLTFLoader加载成功", 90);
+                    loadedDependencies++;
+                    checkDependenciesComplete();
+                } else {
+                    showError("GLTFLoader加载失败");
+                    updateStatus("GLTFLoader加载失败", 90);
+                }
+            };
+            gltfLoaderScript.onerror = () => {
+                showError("无法加载GLTFLoader脚本");
+                updateStatus("GLTFLoader加载失败", 90);
+            };
+            document.body.appendChild(gltfLoaderScript);
             
             function checkDependenciesComplete() {
                 if (loadedDependencies === totalDependencies) {
