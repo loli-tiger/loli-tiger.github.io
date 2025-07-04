@@ -236,14 +236,16 @@ function initApp(THREE, Stats, OrbitControls) {
                 (gltf) => {
                     const model = gltf.scene;
                     
-                    // 应用材质到模型所有部分
+                    // 增强环境光反射强度以更好显示原始材质
                     model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material = new THREE.MeshPhongMaterial({
-                                color: 0x9c27b0, // 紫色
-                                shininess: 80,
-                                specular: 0xffffff
-                            });
+                        if (child.isMesh && child.material) {
+                            child.material.envMapIntensity = 2.0; // 增强环境光影响
+                            
+                            // 启用金属质感渲染
+                            if (child.material.isMeshStandardMaterial) {
+                                child.material.metalness = 0.8;
+                                child.material.roughness = 0.2;
+                            }
                         }
                     });
                     
