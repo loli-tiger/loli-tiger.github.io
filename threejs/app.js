@@ -25,6 +25,22 @@ function initApp(THREE, Stats, OrbitControls) {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 5, 10);
     camera.lookAt(0, 0, 0);
+
+    // 修改场景背景颜色为纯白色
+    scene.background = new THREE.Color(0xffffff);
+
+    // 添加白色地面
+    const groundGeometry = new THREE.PlaneGeometry(50, 50);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.9,
+    metalness: 0.1
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -2; // 地面在物体下方
+    ground.receiveShadow = true; // 接收阴影
+    scene.add(ground);
     
     // 3. 创建渲染器
     statusText.textContent = "创建渲染器...";
